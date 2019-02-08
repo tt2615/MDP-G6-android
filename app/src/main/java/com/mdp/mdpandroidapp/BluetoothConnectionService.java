@@ -24,14 +24,14 @@ public class BluetoothConnectionService {
             UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     private final BluetoothAdapter mBluetoothAdapter;
-    Context mContext;
+    private Context mContext;
 
     private AcceptThread mInsecureAcceptThread;
 
     private ConnectThread mConnectThread;
     private BluetoothDevice mmDevice;
     private UUID deviceUUID;
-    ProgressDialog mProgressDialog;
+    private ProgressDialog mProgressDialog;
 
     private ConnectedThread mConnectedThread;
 

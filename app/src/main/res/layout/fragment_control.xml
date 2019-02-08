@@ -12,7 +12,7 @@
         <TextView
             android:id="@+id/statusBarTitle"
             android:layout_alignStart="@id/statusBar"
-            android:layout_jabove="@id/statusBar"
+            android:layout_above="@id/statusBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Status Bar"/>

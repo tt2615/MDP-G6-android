@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -51,22 +50,24 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
 
+    public ArrayList<BroadcastReceiver> receivers = new ArrayList<BroadcastReceiver>(); //for unregister receivers when quit
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View RootView = inflater.inflate(R.layout.fragment_connect, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_connect, container, false);
 
         //define buttons and views
-        btnEnable_DisableBT = (Button) RootView.findViewById(R.id.btnONOFF);
-        btnEnableDisable_Discoverable = (Button) RootView.findViewById(R.id.btnDiscoverable_on_off);
-        btnDiscover = (Button) RootView.findViewById(R.id.btnFindUnpairedDevices);
-        btnSend = (Button) RootView.findViewById(R.id.SendMsg);
-        btnStartConnection = (Button) RootView.findViewById(R.id.StartConnection);
-        msgReceived = (TextView) RootView.findViewById(R.id.MsgReceived);
-        msgToSend = (EditText) RootView.findViewById(R.id.MsgToBeSent);
-        lvNewDevices = (ListView) RootView.findViewById(R.id.lvNewDevices);
+        btnEnable_DisableBT = (Button) rootView.findViewById(R.id.btnONOFF);
+        btnEnableDisable_Discoverable = (Button) rootView.findViewById(R.id.btnDiscoverable_on_off);
+        btnDiscover = (Button) rootView.findViewById(R.id.btnFindUnpairedDevices);
+        btnSend = (Button) rootView.findViewById(R.id.SendMsg);
+        btnStartConnection = (Button) rootView.findViewById(R.id.StartConnection);
+        msgReceived = (TextView) rootView.findViewById(R.id.MsgReceived);
+        msgToSend = (EditText) rootView.findViewById(R.id.MsgToBeSent);
+        lvNewDevices = (ListView) rootView.findViewById(R.id.lvNewDevices);
 
         //set bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -123,18 +124,26 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             }
         });
 
-        return RootView;
+        return rootView;
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: called.");
         super.onDestroy();
-        getActivity().unregisterReceiver(mBroadcastReceiver1);
-        getActivity().unregisterReceiver(mBroadcastReceiver2);
-        getActivity().unregisterReceiver(mBroadcastReceiver3);
-        getActivity().unregisterReceiver(mBroadcastReceiver4);
+        unregisterReceiver(mBroadcastReceiver1);
+        unregisterReceiver(mBroadcastReceiver2);
+        unregisterReceiver(mBroadcastReceiver3);
+        unregisterReceiver(mBroadcastReceiver4);
         mBluetoothAdapter.cancelDiscovery();
+    }
+
+    public void unregisterReceiver(BroadcastReceiver receiver){
+        if (receivers.contains(receiver)){
+            receivers.remove(receiver);
+            getActivity().unregisterReceiver(receiver);
+            Log.d(TAG, getClass().getSimpleName() + "unregistered receiver: "+receiver);
+        }
     }
 
     /**
@@ -144,6 +153,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            receivers.add(mBroadcastReceiver4);
 
             if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -198,6 +208,8 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            receivers.add(mBroadcastReceiver1);
+
             // When discovery finds a device
             if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
@@ -245,6 +257,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            receivers.add(mBroadcastReceiver2);
 
             if (action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
 
@@ -305,6 +318,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            receivers.add(mBroadcastReceiver3);
             Log.d(TAG, "onReceive: ACTION FOUND.");
 
             //populate a list of devices connectible if discover mode turns on
