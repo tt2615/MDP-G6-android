@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ControlFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/statusBarTitle"
+            android:layout_alignStart="@id/statusBar"
+            android:layout_jabove="@id/statusBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status Bar"/>
+
+        <TextView
+            android:id="@+id/statusBar"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/btnForward"
+            android:layout_marginBottom="10dp"
+            android:layout_width="300dp"
+            android:layout_height="150dp"
+            android:background="@drawable/boarder"/>
+
+        <Button
+            android:id="@+id/btnForward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="forward"/>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnForward"
+            android:layout_centerHorizontal="true">
+
+            <Button
+                android:id="@+id/btnTurnLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Turn Left" />
+
+            <Button
+                android:id="@+id/btnTurnRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Turn Right" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>
