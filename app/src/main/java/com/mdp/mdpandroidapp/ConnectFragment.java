@@ -44,7 +44,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     EditText msgToSend;
 
     private static final UUID MY_UUID_INSECURE =
-            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+            UUID.fromString("8a7b95fe-9de3-4523-9ac6-65d923b2ad98");
 
     BluetoothDevice mBTDevice;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
@@ -80,7 +80,17 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         getActivity().registerReceiver(mBroadcastReceiver4, filter);
 
-        //listener for on/off BT button
+        //start AcceptThread, waiting for possible connection
+        mBluetoothConnection = new BluetoothConnectionService(getActivity());
+
+        //initiate on/off BT button
+        if(!mBluetoothAdapter.isEnabled()){
+            btnEnable_DisableBT.setText("ON Bluetooth");
+        }
+        else {
+            btnEnable_DisableBT.setText("OFF Bluetooth");
+        }
+
         btnEnable_DisableBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -89,7 +99,14 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             }
         });
 
-        //listener for on/off discoverable button
+        //initiate on/off discoverable button
+        if(mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
+            btnEnableDisable_Discoverable.setText("Discoverable ON");
+        }
+        else {
+            btnEnableDisable_Discoverable.setText("Discoverable OFF");
+        }
+
         btnEnableDisable_Discoverable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View view) {
@@ -107,15 +124,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             }
         });
 
-        //listener for start receiving button
-        btnStartConnection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startConnection();
-            }
-        });
-
-        //listener for sending
+        //listener for sending button
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -147,7 +156,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     }
 
     /**
-     * Broadcast Receiver that detects bond state changes (Pairing status changes)
+     * Broadcast Receiver that detects bond state changes
      */
     private final BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
         @Override
@@ -158,10 +167,9 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 //3 cases:
-                //case1: bonded already
+                //case1: already bonded
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
-                    Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
-                    mBTDevice = mDevice;
+                    Log.d(TAG, "BroadcastReceiver: BOND_BONDED");
                 }
                 //case2: creating a bond
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING) {
@@ -216,15 +224,19 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
                 switch(state){
                     case BluetoothAdapter.STATE_OFF:
+                        btnEnable_DisableBT.setText("ON Bluetooth");
                         Log.d(TAG, "onReceive: STATE OFF");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
+                        btnEnable_DisableBT.setText("Turning Off...");
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
                         break;
                     case BluetoothAdapter.STATE_ON:
+                        btnEnable_DisableBT.setText("OFF Bluetooth");
                         Log.d(TAG, "mBroadcastReceiver1: STATE ON");
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
+                        btnEnable_DisableBT.setText("Turning On...");
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
                         break;
                 }
@@ -345,6 +357,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         String deviceName = mBTDevices.get(i).getName();
         String deviceAddress = mBTDevices.get(i).getAddress();
 
+
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
@@ -352,10 +365,12 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         //NOTE: Requires API 17+
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
             Log.d(TAG, "Trying to pair with " + deviceName);
+
             mBTDevices.get(i).createBond();
 
             mBTDevice = mBTDevices.get(i);
-            mBluetoothConnection = new BluetoothConnectionService(getActivity());
+            Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
+            mBluetoothConnection.startClient(mBTDevice,MY_UUID_INSECURE);
         }
     }
 
@@ -380,26 +395,5 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         }else{
             Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
         }
-    }
-
-    /**
-     * Start connecting to the selected BT device
-     * called when btnStartConnection is clicked
-     */
-    public void startConnection(){
-        if(mBTDevice!=null) startBTConnection(mBTDevice,MY_UUID_INSECURE);
-        else {
-            Toast.makeText(getActivity(),"You are not connected to any device",Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * starting chat service method
-     * called when btnSend is clicked
-     */
-    public void startBTConnection(BluetoothDevice device, UUID uuid){
-        Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-
-        mBluetoothConnection.startClient(device,uuid);
     }
 }
