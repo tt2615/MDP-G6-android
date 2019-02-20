@@ -13,62 +13,100 @@
             android:id="@+id/f1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/f2"
             android:layout_centerHorizontal="true">
+            <!--android:layout_above="@id/f2"-->
 
             <TextView
                 android:id="@+id/f1Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="F1"/>
+                android:text="F1" />
 
-            <TextView
+            <EditText
                 android:id="@+id/f1Value"
-                android:layout_toRightOf="@id/f1Title"
-                android:layout_marginLeft="10dp"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/boarder"/>
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@id/f1Title"
+                android:background="@drawable/boarder" />
 
             <Button
                 android:id="@+id/f1Configure"
-                android:layout_toRightOf="@id/f1Value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ConFigure"/>
+                android:layout_toRightOf="@id/f1Value"
+                android:text="ConFigure" />
+
+
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/f2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
+            android:layout_centerInParent="true"
+            android:layout_below="@+id/f1">
 
             <TextView
-                android:id="@+id/f2Title"
+                android:id="@+id/f1_is"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="F1"/>
+                android:text="F1 is: " />
 
             <TextView
-                android:id="@+id/f2Value"
-                android:layout_toRightOf="@id/f1Title"
-                android:layout_marginLeft="10dp"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/boarder"/>
-
-            <Button
-                android:id="@+id/f2Configure"
-                android:layout_toRightOf="@id/f1Value"
+                android:id="@+id/f1var"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ConFigure"/>
-
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true">
+
+            <Button
+                android:id="@+id/test_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="test"
+                />
+
+        </LinearLayout>
+
+
+        <!--<LinearLayout-->
+        <!--android:id="@+id/f2"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerInParent="true">-->
+
+        <!--<TextView-->
+        <!--android:id="@+id/f2Title"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="F2" />-->
+
+        <!--<EditText-->
+        <!--android:id="@+id/f2Value"-->
+        <!--android:layout_width="200dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:layout_toRightOf="@id/f2Title"-->
+        <!--android:background="@drawable/boarder" />-->
+
+        <!--<Button-->
+        <!--android:id="@+id/f2Configure"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_toRightOf="@id/f2Value"-->
+        <!--android:text="ConFigure" />-->
+
+
+        <!--</LinearLayout>-->
 
     </RelativeLayout>
 
 </FrameLayout>
+
