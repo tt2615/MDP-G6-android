@@ -2,6 +2,7 @@ package com.mdp.mdpandroidapp;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -51,6 +52,11 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     public DeviceListAdapter mDeviceListAdapter;
 
     public ArrayList<BroadcastReceiver> receivers = new ArrayList<BroadcastReceiver>(); //for unregister receivers when quit
+
+    // Intent request codes
+    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_ENABLE_BT = 3;
 
 
     @Override
@@ -145,8 +151,14 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         unregisterReceiver(mBroadcastReceiver3);
         unregisterReceiver(mBroadcastReceiver4);
         mBluetoothAdapter.cancelDiscovery();
+        if(mBluetoothConnection!=null){
+            mBluetoothConnection.stop();
+        }
     }
 
+    /**
+     * Unregister all the receivers
+     */
     public void unregisterReceiver(BroadcastReceiver receiver){
         if (receivers.contains(receiver)){
             receivers.remove(receiver);
@@ -294,7 +306,6 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
                         Log.d(TAG, "mBroadcastReceiver2: Connected.");
                         break;
                 }
-
             }
         }
     };
@@ -363,15 +374,16 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
         //create the bond and connection
         //NOTE: Requires API 17+
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
-            Log.d(TAG, "Trying to pair with " + deviceName);
+        Log.d(TAG, "Trying to pair with " + deviceName);
 
-            mBTDevices.get(i).createBond();
+        mBTDevice = mBTDevices.get(i);
 
-            mBTDevice = mBTDevices.get(i);
-            Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-            mBluetoothConnection.startClient(mBTDevice,MY_UUID_INSECURE);
-        }
+        //create bond
+        mBTDevice.createBond();
+
+        Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
+        mBluetoothConnection.startClient(mBTDevice,false);
+        //todo figuring out which is secure and which is insecure
     }
 
 
