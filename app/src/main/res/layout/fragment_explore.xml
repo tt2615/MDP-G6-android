@@ -7,23 +7,60 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/ExploreTitle"
+            android:id="@+id/click_test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Explore Fragment"
-            android:textSize="20dp"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"/>
+            android:text="click_me"
+            android:background="#1cb2ed"
+            android:layout_centerInParent="true"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ExploreTitle"
-            android:text="edit fragment_explore.xml"
-            android:layout_centerHorizontal="true"/>
+            android:layout_above="@id/buttons"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/textview_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="mode"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:layout_alignParentBottom="true"
+            android:padding="10dp">
+
+            <Button
+                android:id="@+id/waypoint_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_weight="0.5"
+                android:text="waypoint"
+                android:padding="10dp" />
+
+            <Button
+                android:id="@+id/startpoint_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_weight="0.5"
+                android:text="start"
+                android:layout_toRightOf="@id/waypoint_button"
+                android:padding="10dp" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

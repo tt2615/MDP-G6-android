@@ -24,6 +24,7 @@ public class ConfigureFragment extends Fragment {
     public ConfigureFragment() {
         // Required empty public constructor
     }
+
     private Button configure_F1;
     private EditText text_F1;
     SharedPreferences sp_f1;
