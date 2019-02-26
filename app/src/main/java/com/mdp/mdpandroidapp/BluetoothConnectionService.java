@@ -22,9 +22,9 @@ public class BluetoothConnectionService {
     private static final String appName = "MDPG6";
 
     private static final UUID MY_UUID_SECURE =
-            UUID.fromString("67a403a8-3596-11e9-b210-d663bd873d93");
+            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID_INSECURE =
-            UUID.fromString("8a7b95fe-9de3-4523-9ac6-65d923b2ad98");
+            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private final BluetoothAdapter mBluetoothAdapter;
     private Context mContext;
@@ -114,17 +114,21 @@ public class BluetoothConnectionService {
             BluetoothServerSocket tmp = null;
 
             // Create a new listening server socket
-            try {
-                if(secure){
+            if(secure){
+                try {
                     tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(appName, MY_UUID_SECURE);
                     Log.d(TAG, "AcceptThread: Setting up secure Server using: " + MY_UUID_SECURE);
+                } catch (IOException e1) {
+                    Log.e(TAG, "AcceptThread Secure: IOException: " + e1.getMessage());
                 }
-                else {
+            }
+            else {
+                try {
                     tmp = mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(appName, MY_UUID_INSECURE);
-                    Log.d(TAG, "AcceptThread: Setting up insecure Server using: " + MY_UUID_INSECURE);
+                } catch (IOException e1) {
+                    Log.e(TAG, "AcceptThread Insecure: IOException: " + e1.getMessage());
                 }
-            } catch (IOException e) {
-                Log.e(TAG, "AcceptThread: IOException: " + e.getMessage());
+                Log.d(TAG, "AcceptThread: Setting up insecure Server using: " + MY_UUID_INSECURE);
             }
 
             mmServerSocket = tmp;
@@ -180,29 +184,32 @@ public class BluetoothConnectionService {
         private BluetoothDevice mmDevice;
 
         public ConnectThread(BluetoothDevice device, boolean secure) {
-            Log.d(TAG, "ConnectThread: started.");
             mmDevice = device;
+            Log.d(TAG, "ConnectThread: started."+mmDevice.getName()+mmDevice.getAddress());
 
             BluetoothSocket tmp = null;
             Log.i(TAG, "RUN mConnectThread ");
 
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
-            try {
-                if(secure){
-                    Log.d(TAG, "ConnectThread: Trying to create SecureRfcommSocket using UUID: "
-                            +MY_UUID_SECURE );
+            if(secure){
+                Log.d(TAG, "ConnectThread: Trying to create SecureRfcommSocket using UUID: "
+                        +MY_UUID_SECURE );
+                try {
                     tmp = mmDevice.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
+                } catch (IOException e1) {
+                    Log.e(TAG, "ConnectThread: Could not create InsecureRfcommSocket " + e1.getMessage());
                 }
-                else {
-                    Log.d(TAG, "ConnectThread: Trying to create InsecureRfcommSocket using UUID: "
-                            +MY_UUID_INSECURE );
-                    tmp = mmDevice.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "ConnectThread: Could not create InsecureRfcommSocket " + e.getMessage());
             }
-
+            else {
+                Log.d(TAG, "ConnectThread: Trying to create InsecureRfcommSocket using UUID: "
+                        +MY_UUID_INSECURE );
+                try {
+                    tmp = mmDevice.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                } catch (IOException e1) {
+                    Log.e(TAG, "ConnectThread: Could not create InsecureRfcommSocket " + e1.getMessage());
+                }
+            }
             mmSocket = tmp;
         }
 

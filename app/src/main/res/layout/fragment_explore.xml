@@ -9,21 +9,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/ExploreTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Explore Fragment"
-            android:textSize="20dp"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/ExploreTitle"
-            android:text="edit fragment_explore.xml"
-            android:layout_centerHorizontal="true"/>
+        <GridLayout
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:columnCount="15"
+            android:descendantFocusability="afterDescendants"
+            android:gravity="center"
+            android:horizontalSpacing="30dp"
+            android:paddingLeft="20dp"
+            android:rowCount="20"
+            android:stackFromBottom="true"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="30dp">
+        </GridLayout>
 
     </RelativeLayout>
 

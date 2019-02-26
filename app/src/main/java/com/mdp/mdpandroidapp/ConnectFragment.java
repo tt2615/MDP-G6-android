@@ -44,9 +44,6 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     TextView msgReceived;
     EditText msgToSend;
 
-    private static final UUID MY_UUID_INSECURE =
-            UUID.fromString("8a7b95fe-9de3-4523-9ac6-65d923b2ad98");
-
     BluetoothDevice mBTDevice;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
@@ -126,6 +123,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             @Override
             public void onClick (View view) {
                 Log.d(TAG, "onClick: find unpaired devices");
+                mBTDevices.clear();
                 discover();
             }
         });
@@ -364,26 +362,23 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         //first cancel discovery because its very memory intensive.
         mBluetoothAdapter.cancelDiscovery();
 
-        Log.d(TAG, "onItemClick: You Clicked on a device.");
-        String deviceName = mBTDevices.get(i).getName();
-        String deviceAddress = mBTDevices.get(i).getAddress();
+        mBTDevice = mBTDevices.get(i);
 
+        Log.d(TAG, "onItemClick: You Clicked on a device.");
+        String deviceName = mBTDevice.getName();
+        String deviceAddress = mBTDevice.getAddress();
 
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
-        //create the bond and connection
-        //NOTE: Requires API 17+
         Log.d(TAG, "Trying to pair with " + deviceName);
-
-        mBTDevice = mBTDevices.get(i);
 
         //create bond
         mBTDevice.createBond();
 
+        //create connection
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
         mBluetoothConnection.startClient(mBTDevice,false);
-        //todo figuring out which is secure and which is insecure
     }
 
 
