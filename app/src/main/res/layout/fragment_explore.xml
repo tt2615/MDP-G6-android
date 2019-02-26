@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <TextView
+        <Button
             android:id="@+id/click_test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             android:gravity="center_horizontal">
 
             <TextView
-                android:id="@+id/textview_status"
+                android:id="@+id/button_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="mode"
