@@ -11,30 +11,30 @@
         android:orientation="horizontal">
 
         <GridLayout
-            android:id="@+id/map"
+            android:id="@+id/arena"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:columnCount="15"
+            android:columnCount="16"
             android:descendantFocusability="afterDescendants"
             android:gravity="center"
             android:horizontalSpacing="30dp"
             android:paddingLeft="20dp"
-            android:rowCount="20"
+            android:rowCount="21"
             android:stackFromBottom="true"
             android:stretchMode="columnWidth"
             android:verticalSpacing="30dp">
         </GridLayout>
 
-        <Button
-            android:id="@+id/click_test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="click_me"
-            android:background="#1cb2ed"
-            android:layout_centerInParent="true"/>
+        <!--<Button-->
+            <!--android:id="@+id/click_test"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="click_me"-->
+            <!--android:background="#1cb2ed"-->
+            <!--android:layout_centerInParent="true"/>-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_weight="0.5"
-                android:text="start"
+                android:text="startpoint"
                 android:layout_toRightOf="@id/waypoint_button"
                 android:padding="10dp" />
 

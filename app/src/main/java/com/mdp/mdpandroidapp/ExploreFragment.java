@@ -1,6 +1,10 @@
 
 package com.mdp.mdpandroidapp;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -8,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.TextView;
+
 
 
 /**
@@ -20,38 +26,29 @@ public class ExploreFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public class Box {
-        private Button click_box;
-        String grid_status;
-        int row, col;
-
-        private Box() {
-            grid_status = "unoccupied";
-            row = 1;
-            col = 1;
-        }
-    }
-    private Box box = new Box();
-
     // waypoint button and startpoint button
     private Button waypoint_button;
     private Button startpoint_button;
     private TextView button_status;
-    int waypoint_mode, startpoint_mode;
+    private Arena mArena;
+
+    int mode = 0;
+    static final int ModeWayPoint = 1;
+    static final int ModeStartPoint = 2;
+    static final int ModeIdle =0;
+
+    int wayPointId = 0;
+    int startPointId = 0;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View exploreView = inflater.inflate(R.layout.fragment_explore, container, false);
 
-        // code for gridlayout
-        // xxx
-
         // instantiate the two buttons, clickable, and status
         waypoint_button = exploreView.findViewById(R.id.waypoint_button);
         startpoint_button = exploreView.findViewById(R.id.startpoint_button);
-        box.click_box = exploreView.findViewById(R.id.click_test);
         button_status = exploreView.findViewById(R.id.button_status);
         button_status.setText("none");
 
@@ -59,11 +56,14 @@ public class ExploreFragment extends Fragment {
         waypoint_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (waypoint_mode == 0) {
-                    set_mode("waypoint");
+                if (mode!=ModeWayPoint) {
+                    set_mode(ModeWayPoint);
+                    waypoint_button.setText("Back To Idle");
+                    startpoint_button.setText("StartPoint");
                 }
                 else {
-                    set_mode("neither");
+                    set_mode(ModeIdle);
+                    waypoint_button.setText("WayPoint");
                 }
             }
         });
@@ -72,75 +72,35 @@ public class ExploreFragment extends Fragment {
         startpoint_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (startpoint_mode == 0) {
-                    set_mode("startpoint");
+                if (mode!=ModeStartPoint) {
+                    set_mode(ModeStartPoint);
+                    startpoint_button.setText("Back To Idle");
+                    waypoint_button.setText("WayPoint");
                 }
                 else {
-                    set_mode("neither");
+                    set_mode(ModeIdle);
+                    startpoint_button.setText("StartPoint");
                 }
-            }
-        });
-
-        // setonclicklistener click_test
-        box.click_box.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (box.grid_status == "unoccupied") {
-                    if (waypoint_mode == 1){
-                        box.grid_status = "waypoint";
-                        set_coord(box.row, box.col, "waypoint");
-                    }
-                    else if (startpoint_mode == 1){
-                        box.grid_status = "startpoint";
-                        set_coord(box.row, box.col, "startpoint");
-                    }
-                }
-
-                else if (box.grid_status == "waypoint"){
-                    if (waypoint_mode == 1){
-                        // do nothing
-                    }
-                    else if (startpoint_mode == 1){
-                        box.grid_status = "startpoint";
-                        set_coord(box.row, box.col, "startpoint");
-                        unset_coord("waypoint");
-                    }
-                }
-
-                else if (box.grid_status == "startpoint"){
-                    if (startpoint_mode == 1){
-                        // do nothing
-                    }
-                    else if (waypoint_mode == 1){
-                        box.grid_status = "waypoint";
-                        set_coord(box.row, box.col, "waypoint");
-                        unset_coord("startpoint");
-                    }
-                }
-
-                // send coordinates and info to RPi
             }
         });
 
         return exploreView;
     }
 
-    public void set_mode(String point) {
-        if (point == "waypoint") {
-            startpoint_mode = 0;
-            waypoint_mode = 1;
-            button_status.setText("waypoint mode");
+    public void set_mode(int choice) {
+        mode = choice;
+        switch (choice){
+            case ModeIdle:
+                button_status.setText("None");
+                break;
+            case ModeWayPoint:
+                button_status.setText("Select WayPoint");
+                break;
+            case ModeStartPoint:
+                button_status.setText("Select StartPoint");
+                break;
         }
-        else if (point == "startpoint"){
-            waypoint_mode = 0;
-            startpoint_mode = 1;
-            button_status.setText("startpoint mode");
-        }
-        else if (point == "neither"){
-            waypoint_mode = 0;
-            startpoint_mode = 0;
-            button_status.setText("none");
-        }
+
     }
 
     public void set_coord(int row, int col, String point){
@@ -149,5 +109,121 @@ public class ExploreFragment extends Fragment {
 
     public void unset_coord(String point){
         Log.d("unset coordinates", "coordinates for " + point + " unset!");
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+
+        super.onActivityCreated(savedInstanceState);
+        GridLayout arenaLayout = (GridLayout)getActivity().findViewById(R.id.arena);
+        Log.d("EFragment","checkpoint:"+Boolean.toString(arenaLayout==null));
+        mArena = new Arena(getActivity(),arenaLayout);
+    }
+
+    private class Arena {
+        Context mContext;
+        GridLayout mArena;
+        Integer mCount=0;
+        Integer mCol=0;
+        Integer mRow=0;
+        TextView grid;
+
+        public Arena(Context context, GridLayout arena){
+            mContext= context;
+            mArena = arena;
+            createArena();
+        }
+
+        private void createArena() {
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(Color.parseColor("#FFFFFF"));
+            background.setStroke(1,Color.parseColor("#000000"));
+            for (int row=0;row<21; row++){
+                for(int col=0; col<16; col++){
+                    grid = new TextView(mContext);
+                    grid.setId(mCount);
+                    grid.setWidth(40);
+                    grid.setHeight(40);
+
+                    final int gridId = grid.getId();
+                    mCol = getCol(mCount);
+                    mRow = getRow(mCount);
+                    if(mCol==0&&mRow==0){}
+                    else if(mCol==0){
+                        Integer tmp=mRow-1;
+                        grid.setText(tmp.toString());
+                    }
+                    else if(mRow==0){
+                        Integer tmp=mCol-1;
+                        grid.setText(tmp.toString());
+                    }
+                    else {
+                        grid.setBackground(background);
+                    }
+
+                    final Integer finalmCount = mCount;
+                    grid.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            switch(mode){
+                                case ModeIdle:
+                                    break;
+                                case ModeWayPoint:
+                                    removeWayPoint();
+                                    setWayPoint(gridId);
+                                    Log.d("Grid",Integer.toString(grid.getId()));
+                                    break;
+                                case ModeStartPoint:
+                                    removeStartPoint();
+                                    setStartPoint(gridId);
+                                    break;
+                            }
+                        }
+                    });
+                    mArena.addView(grid);
+                    mCount++;
+                }
+            }
+        }
+
+        private void removeWayPoint() {
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(Color.parseColor("#FFFFFF"));
+            background.setStroke(1,Color.parseColor("#000000"));
+            mArena.getChildAt(wayPointId).setBackground(background);
+        }
+
+        private void setWayPoint(Integer id) {
+            wayPointId=id;
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(Color.parseColor("#FF0000"));
+            background.setStroke(1,Color.parseColor("#000000"));
+            mArena.getChildAt(id).setBackground(background);
+        }
+
+        private void removeStartPoint() {
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(Color.parseColor("#FFFFFF"));
+            background.setStroke(1,Color.parseColor("#000000"));
+            mArena.getChildAt(startPointId).setBackground(background);
+        }
+
+        private void setStartPoint(Integer id) {
+            startPointId=id;
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(Color.parseColor("#00FF00"));
+            background.setStroke(1,Color.parseColor("#000000"));
+            mArena.getChildAt(startPointId).setBackground(background);
+        }
+
+        private int getRow(Integer mCount) {
+            return 20-mCount/16;
+        }
+
+        private int getCol(Integer mCount) {
+            return mCount%16;
+        }
+
+
     }
 }
