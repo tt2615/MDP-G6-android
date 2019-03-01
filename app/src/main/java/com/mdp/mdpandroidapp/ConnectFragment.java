@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,10 +19,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.os.Handler;
 import android.widget.Toast;
 
 import java.nio.charset.Charset;
@@ -39,21 +42,32 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     BluetoothAdapter mBluetoothAdapter;
     BluetoothConnectionService mBluetoothConnection;
 
-    ListView lvNewDevices;
-    Button btnEnable_DisableBT, btnEnableDisable_Discoverable, btnDiscover, btnSend, btnStartConnection;
-    TextView msgReceived;
-    EditText msgToSend;
+    private ListView lvNewDevices;
+    private Button btnEnable_DisableBT, btnEnableDisable_Discoverable, btnDiscover, btnSend;
+    private EditText msgToSend;
 
-    BluetoothDevice mBTDevice;
+    public BluetoothDevice mBTDevice;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
 
+    private ListView mDeviceMessages;
+    private ArrayAdapter<String> mDeviceMessagesListAdapter;
+
     public ArrayList<BroadcastReceiver> receivers = new ArrayList<BroadcastReceiver>(); //for unregister receivers when quit
 
-    // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
-    private static final int REQUEST_ENABLE_BT = 3;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //set bluetooth adapter
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        //  Get instance of BluetoothService
+        mBluetoothConnection = BluetoothConnectionService.getInstance();
+
+        //  Register handler callback to handle BluetoothService messages
+        mBluetoothConnection.registerNewHandlerCallback(bluetoothServiceMessageHandler);
+    }
+
 
 
     @Override
@@ -67,10 +81,11 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         btnEnableDisable_Discoverable = (Button) rootView.findViewById(R.id.btnDiscoverable_on_off);
         btnDiscover = (Button) rootView.findViewById(R.id.btnFindUnpairedDevices);
         btnSend = (Button) rootView.findViewById(R.id.SendMsg);
-        btnStartConnection = (Button) rootView.findViewById(R.id.StartConnection);
-        msgReceived = (TextView) rootView.findViewById(R.id.MsgReceived);
         msgToSend = (EditText) rootView.findViewById(R.id.MsgToBeSent);
         lvNewDevices = (ListView) rootView.findViewById(R.id.lvNewDevices);
+        mDeviceMessages = (ListView) rootView.findViewById(R.id.MsgReceived);
+        mDeviceMessagesListAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        mDeviceMessages.setAdapter(mDeviceMessagesListAdapter);
 
         //set bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -83,8 +98,6 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         getActivity().registerReceiver(mBroadcastReceiver4, filter);
 
-        //start AcceptThread, waiting for possible connection
-        mBluetoothConnection = new BluetoothConnectionService(getActivity());
 
         //initiate on/off BT button
         if(!mBluetoothAdapter.isEnabled()){
@@ -132,8 +145,11 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                byte[] bytes = msgToSend.getText().toString().getBytes(Charset.defaultCharset());
-                mBluetoothConnection.write(bytes);
+                byte[] message = msgToSend.getText().toString().trim().getBytes();
+                if (message.length != 0) {
+                    msgToSend.setText("");
+                    mBluetoothConnection.write(message);
+                }
             }
         });
 
@@ -357,6 +373,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
      * Create bond on selected device
      * Override method of implemented Interface: AdapterView.OnItemClickListener
      */
+
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         //first cancel discovery because its very memory intensive.
@@ -378,7 +395,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
         //create connection
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-        mBluetoothConnection.startClient(mBTDevice,false);
+        mBluetoothConnection.startClient(mBTDevice,true);
     }
 
 
@@ -403,4 +420,23 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
         }
     }
+
+    private final Handler.Callback bluetoothServiceMessageHandler = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            try {
+                switch (message.what) {
+                    case BluetoothConnectionService.MESSAGE_READ:
+                        //  Reading message from remote device
+                        String receivedMessage = message.obj.toString();
+                        mDeviceMessagesListAdapter.add(receivedMessage);
+                        return false;
+                }
+            }catch (Throwable t) {
+                Log.e(TAG,null, t);
+            }
+
+            return false;
+        }
+    };
 }
