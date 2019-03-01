@@ -14,9 +14,12 @@
             android:id="@+id/arena"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
             android:columnCount="16"
             android:descendantFocusability="afterDescendants"
             android:gravity="center"
@@ -25,60 +28,119 @@
             android:rowCount="21"
             android:stackFromBottom="true"
             android:stretchMode="columnWidth"
-            android:verticalSpacing="30dp">
-        </GridLayout>
+            android:verticalSpacing="30dp"></GridLayout>
 
-        <!--<Button-->
-            <!--android:id="@+id/click_test"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="click_me"-->
-            <!--android:background="#1cb2ed"-->
-            <!--android:layout_centerInParent="true"/>-->
+        <RelativeLayout
+            android:id="@+id/algo_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerHorizontal="true"
+            android:padding="10dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+            <Button
+                android:id="@+id/fastpath_button"
+                android:enabled="false"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="fastest path"/>
+
+            <Button
+                android:id="@+id/explore_button"
+                android:enabled="false"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="explore"
+                android:layout_below="@id/fastpath_button"/>
+
+            <Button
+                android:id="@+id/auto_button"
+                android:enabled="false"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="auto"
+                android:layout_below="@id/explore_button"/>
+
+            <Button
+                android:id="@+id/manual_button"
+                android:enabled="false"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="manual"
+                android:layout_below="@id/auto_button"/>
+
+            <Button
+                android:id="@+id/update_button"
+                android:enabled="false"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="update"
+                android:layout_below="@id/manual_button"/>
+
+            <Button
+                android:id="@+id/cancel_button"
+                android:enabled="false"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="cancel"
+                android:layout_below="@id/update_button"/>
+
+            <TextView
+                android:id="@+id/algo_mode"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Stationary"
+                android:layout_below="@id/cancel_button"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/buttons"
-            android:gravity="center_horizontal">
+            android:layout_centerHorizontal="true">
 
             <TextView
                 android:id="@+id/button_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="mode"
-                />
+                android:text="mode"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/buttons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
             android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
             android:padding="10dp">
 
             <Button
                 android:id="@+id/waypoint_button"
-                android:layout_width="wrap_content"
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_weight="0.5"
-                android:text="waypoint"
-                android:padding="10dp" />
+                android:text="waypoint"/>
 
             <Button
                 android:id="@+id/startpoint_button"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="startpoint"
+                android:layout_toRightOf="@id/waypoint_button"/>
+
+            <Button
+                android:id="@+id/reset_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_weight="0.5"
-                android:text="startpoint"
-                android:layout_toRightOf="@id/waypoint_button"
-                android:padding="10dp" />
+                android:layout_toRightOf="@id/startpoint_button"
+                android:text="reset"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </RelativeLayout>
 

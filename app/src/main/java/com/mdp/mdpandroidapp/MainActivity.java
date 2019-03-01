@@ -51,9 +51,6 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_connect) {
             setTitle("Connect");
             fragment = new ConnectFragment();
-        } else if (id == R.id.nav_setup) {
-            setTitle("Setup");
-            fragment = new SetupFragment();
         } else if (id == R.id.nav_control) {
             setTitle("Control");
             fragment = new ControlFragment();
