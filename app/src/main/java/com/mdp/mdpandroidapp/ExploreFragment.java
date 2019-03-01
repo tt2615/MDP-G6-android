@@ -1,5 +1,6 @@
 package com.mdp.mdpandroidapp;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -21,9 +22,8 @@ import android.widget.Toast;
  */
 public class ExploreFragment extends Fragment {
 
-    public ExploreFragment() {
-        // Required empty public constructor
-    }
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothConnectionService mBluetoothConnectionService;
 
     // algo buttons
     private Button fastpath_button;
@@ -49,6 +49,12 @@ public class ExploreFragment extends Fragment {
     // class variable for waypoint and startpoint
     int wayPointId = 0;
     int startPointId = 0;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        mBluetoothAdapter = ((MainActivity)getActivity()).ge
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
