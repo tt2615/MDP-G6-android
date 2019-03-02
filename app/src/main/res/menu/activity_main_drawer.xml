@@ -8,9 +8,6 @@
             android:id="@+id/nav_connect"
             android:title="Connect" />
         <item
-            android:id="@+id/nav_setup"
-            android:title="Set Up" />
-        <item
             android:id="@+id/nav_control"
             android:title="Control" />
         <item
