@@ -1,8 +1,6 @@
 package com.mdp.mdpandroidapp;
 
-
 import android.Manifest;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -23,13 +21,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.os.Handler;
-import android.widget.Toast;
-
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class ConnectFragment extends Fragment implements AdapterView.OnItemClickListener{
 
@@ -39,8 +32,8 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
     private static final String TAG = "ConnectFragment";
 
-    BluetoothAdapter mBluetoothAdapter;
-    BluetoothConnectionService mBluetoothConnection;
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothConnectionService mBluetoothConnectionService;
 
     private ListView lvNewDevices;
     private Button btnEnable_DisableBT, btnEnableDisable_Discoverable, btnDiscover, btnSend;
@@ -59,16 +52,11 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         super.onCreate(savedInstanceState);
 
         //set bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        //  Get instance of BluetoothService
-        mBluetoothConnection = BluetoothConnectionService.getInstance();
-
+        mBluetoothAdapter = ((MainActivity)getActivity()).getBluetoothAdapter();
+        mBluetoothConnectionService = ((MainActivity)getActivity()).getBluetoothConnectionService();
         //  Register handler callback to handle BluetoothService messages
-        mBluetoothConnection.registerNewHandlerCallback(bluetoothServiceMessageHandler);
+        mBluetoothConnectionService.registerNewHandlerCallback(bluetoothServiceMessageHandler);
     }
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,9 +75,6 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         mDeviceMessagesListAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mDeviceMessages.setAdapter(mDeviceMessagesListAdapter);
 
-        //set bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
         //for displaying available device lists
         mBTDevices = new ArrayList<>();
         lvNewDevices.setOnItemClickListener(ConnectFragment.this);
@@ -97,7 +82,6 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         //Broadcasts when bond state changes (ie:pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         getActivity().registerReceiver(mBroadcastReceiver4, filter);
-
 
         //initiate on/off BT button
         if(!mBluetoothAdapter.isEnabled()){
@@ -148,7 +132,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
                 byte[] message = msgToSend.getText().toString().trim().getBytes();
                 if (message.length != 0) {
                     msgToSend.setText("");
-                    mBluetoothConnection.write(message);
+                    mBluetoothConnectionService.write(message);
                 }
             }
         });
@@ -165,8 +149,8 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         unregisterReceiver(mBroadcastReceiver3);
         unregisterReceiver(mBroadcastReceiver4);
         mBluetoothAdapter.cancelDiscovery();
-        if(mBluetoothConnection!=null){
-            mBluetoothConnection.stop();
+        if(mBluetoothConnectionService == null){
+            mBluetoothConnectionService.stop();
         }
     }
 
@@ -395,7 +379,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
         //create connection
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-        mBluetoothConnection.startClient(mBTDevice,true);
+        mBluetoothConnectionService.startClient(mBTDevice,true);
     }
 
 
@@ -435,7 +419,6 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             }catch (Throwable t) {
                 Log.e(TAG,null, t);
             }
-
             return false;
         }
     };

@@ -1,5 +1,6 @@
 package com.mdp.mdpandroidapp;
 
+import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,17 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private BluetoothConnectionService mBluetoothConnectionService = BluetoothConnectionService.getInstance();
+    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+    public  BluetoothConnectionService getBluetoothConnectionService() {
+        return mBluetoothConnectionService;
+    }
+
+    public BluetoothAdapter getBluetoothAdapter(){
+        return mBluetoothAdapter;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

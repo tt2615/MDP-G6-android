@@ -1,20 +1,14 @@
 package com.mdp.mdpandroidapp;
-
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.os.ParcelUuid;
 import android.util.Log;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
@@ -39,11 +33,11 @@ public class BluetoothConnectionService {
     private ConnectedThread mConnectedThread;
 
     private Handler mHandler;
-    public static final int MESSAGE_READ = 0;
-    public static final int MESSAGE_WRITE = 1;
+    static final int MESSAGE_READ = 0;
+    static final int MESSAGE_WRITE = 1;
 
 
-    public BluetoothConnectionService() {
+    private BluetoothConnectionService() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mHandler = new Handler(new Handler.Callback() {
             @Override

@@ -4,28 +4,35 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridLayout;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class ExploreFragment extends Fragment {
 
+    private static final String TAG = "ExploreFragment";
+
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothConnectionService mBluetoothConnectionService;
 
-    // algo portion
+    private ArrayAdapter<String> mDeviceMessagesListAdapter;
+    private ListView mDeviceMessages;
+
+    // algo buttons
     private Button fastpath_button;
     private Button explore_button;
     private Button auto_button;
@@ -61,8 +68,80 @@ public class ExploreFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        mBluetoothAdapter = ((MainActivity)getActivity()).getB
+        mBluetoothAdapter = ((MainActivity)getActivity()).getBluetoothAdapter();
+        mBluetoothConnectionService = ((MainActivity)getActivity()).getBluetoothConnectionService();
+        mBluetoothConnectionService.registerNewHandlerCallback(bluetoothServiceMessageHandler);
     }
+
+    private final Handler.Callback bluetoothServiceMessageHandler = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            try {
+
+                switch (message.what) {
+                    case BluetoothConnectionService.MESSAGE_READ:
+                        //  Reading message from remote device
+                        String receivedMessage = message.obj.toString();
+                        switch (receivedMessage.substring(0,2)){
+                            case "po":
+                                int po_x = receivedMessage.charAt(3);
+                                int po_y = receivedMessage.charAt(5);
+                                Log.d(TAG,"android position at: "+po_x+","+po_y);
+                                updatePosition(po_x,po_y);
+                                mDeviceMessagesListAdapter.add("android position at: "+po_x+","+po_y);
+                                break;
+                            case "nt":
+                                int nt_x = receivedMessage.charAt(3);
+                                int nt_y = receivedMessage.charAt(5);
+                                Log.d(TAG,"discovered normal terrain at: "+nt_x+","+nt_y);
+                                discoverNormalTerrain(nt_x,nt_y);
+                                mDeviceMessagesListAdapter.add("discovered normal terrain at: "+nt_x+","+nt_y);
+                                break;
+                            case "ob":
+                                int ob_x = receivedMessage.charAt(3);
+                                int ob_y = receivedMessage.charAt(5);
+                                Log.d(TAG,"discovered obstacle: "+ob_x+","+ob_y);
+                                discoverObstacle(ob_x,ob_y);
+                                mDeviceMessagesListAdapter.add("discovered obstacle at: "+ob_x+","+ob_y);
+                                break;
+                            case "ar":
+                                int ar_x = receivedMessage.charAt(3);
+                                int ar_y = receivedMessage.charAt(5);
+                                char ar_dir = receivedMessage.charAt(7);
+                                Log.d(TAG,"discovered arrow: "+ar_x+","+ar_y+","+ar_dir);
+                                discoverArrow(ar_x,ar_y,ar_dir);
+                                mDeviceMessagesListAdapter.add("discovered arrow: "+ar_x+","+ar_y+","+ar_dir);
+                                break;
+                        }
+                        return false;
+                }
+            }catch (Throwable t) {
+                Log.e(TAG,null, t);
+            }
+            return false;
+        }
+    };
+
+    private void updatePosition(int po_x, int po_y) {
+        //todo: update map position
+    }
+
+    private void discoverNormalTerrain(int nt_x, int nt_y) {
+        //todo: update discovered normal terrain position
+    }
+
+    private void discoverObstacle(int ob_x, int ob_y) {
+        //todo update discovered obstacle position
+    }
+
+    private void discoverArrow(int ar_x, int ar_y, char ar_dir) {
+        //todo update discovered arrow position and direction
+    }
+
+
+
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
@@ -70,6 +149,12 @@ public class ExploreFragment extends Fragment {
         // Inflate the layout for this fragment
         final View exploreView = inflater.inflate(R.layout.fragment_explore, container, false);
 
+        waypoint_button = exploreView.findViewById(R.id.waypoint_button);
+        startpoint_button = exploreView.findViewById(R.id.startpoint_button);
+        reset_button = exploreView.findViewById(R.id.reset_button);
+        button_status = exploreView.findViewById(R.id.button_status);
+        //todo: the default text can be edited in xml
+        button_status.setText("None");
         fastpath_button = exploreView.findViewById(R.id.fastpath_button);
         explore_button = exploreView.findViewById(R.id.explore_button);
         auto_button = exploreView.findViewById(R.id.auto_button);
@@ -83,6 +168,54 @@ public class ExploreFragment extends Fragment {
         reset_button = exploreView.findViewById(R.id.reset_button);
         button_status = exploreView.findViewById(R.id.button_status);
         button_status.setText("None");
+        mDeviceMessages = (ListView) exploreView.findViewById(R.id.MsgReceived);
+        mDeviceMessagesListAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        mDeviceMessages.setAdapter(mDeviceMessagesListAdapter);
+
+        waypoint_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mode!=ModeWayPoint) {
+                    set_mode(ModeWayPoint);
+                    waypoint_button.setText("Back To Idle");
+                    startpoint_button.setText("StartPoint");
+                }
+                else {
+                    set_mode(ModeIdle);
+                    waypoint_button.setText("WayPoint");
+                }
+            }
+        });
+
+        startpoint_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mode!=ModeStartPoint) {
+                    set_mode(ModeStartPoint);
+                    startpoint_button.setText("Back To Idle");
+                    waypoint_button.setText("WayPoint");
+                }
+                else {
+                    set_mode(ModeIdle);
+                    startpoint_button.setText("StartPoint");
+                }
+            }
+        });
+
+        reset_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mArena.removeStartPoint(startPointId);
+                mArena.removeWayPoint(wayPointId);
+                set_mode(ModeIdle);
+                button_status.setText("None");
+                startpoint_button.setText("StartPoint");
+                waypoint_button.setText("WayPoint");
+
+                wayPointId = 0;
+                startPointId = 0;
+            }
+        });
 
         waypoint_coord = exploreView.findViewById(R.id.waypoint_coord);
         wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
@@ -101,6 +234,13 @@ public class ExploreFragment extends Fragment {
                 explore_button.setEnabled(false);
                 cancel_button.setEnabled(true);
                 algo_mode.setText("Fastest Path");
+
+                String start_message = "st[1]";
+                mBluetoothConnectionService.write(start_message.getBytes());
+                String start_point_message = "sp[" + mArena.mRow+1+","+mArena.mCol+1+"]";
+                mBluetoothConnectionService.write(start_point_message.getBytes());
+                String way_point_message = "wp[";
+                mBluetoothConnectionService.write(way_point_message.getBytes());
             }
         });
 
