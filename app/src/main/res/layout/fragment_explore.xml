@@ -97,15 +97,16 @@
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_above="@id/buttons"
             android:layout_centerHorizontal="true">
 
-            <TextView
-                android:id="@+id/button_status"
+            <ListView
+                android:id="@+id/MsgReceived"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="mode"/>
+                android:layout_height="wrap_content">
+
+            </ListView>
 
         </RelativeLayout>
 
@@ -201,6 +202,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/startpoint_display"/>
+
+            <TextView
+                android:id="@+id/button_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="None"
+                android:layout_toRightOf="@id/startpoint_coord"/>
 
         </RelativeLayout>
 
