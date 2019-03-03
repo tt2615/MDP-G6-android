@@ -113,9 +113,9 @@
             android:id="@+id/buttons"
             android:layout_width="wrap_content"
             android:layout_height="75dp"
-            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:padding="10dp">
+            android:padding="10dp"
+            android:layout_above="@id/points">
 
             <Button
                 android:id="@+id/waypoint_button"
@@ -139,6 +139,68 @@
                 android:layout_alignParentBottom="true"
                 android:layout_toRightOf="@id/startpoint_button"
                 android:text="reset"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/points"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/waypoint_display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:text="WayPoint:  "
+                android:layout_weight="1"
+                android:layout_marginRight="10dp"
+                android:layout_toLeftOf="@id/waypoint_coord"/>
+
+            <TextView
+                android:id="@+id/waypoint_coord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/invisview1"/>
+
+            <View
+                android:id="@+id/invisview1"
+                android:layout_width="20dp"
+                android:layout_height="0dp"
+                android:visibility="invisible"
+                android:layout_toLeftOf="@id/separator"/>
+
+            <TextView
+                android:id="@+id/separator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="|"/>
+
+            <View
+                android:id="@+id/invisview2"
+                android:layout_width="20dp"
+                android:layout_height="0dp"
+                android:visibility="invisible"
+                android:layout_toRightOf="@id/separator"/>
+
+            <TextView
+                android:id="@+id/startpoint_display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:text="StartPoint:  "
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/invisview2"/>
+
+            <TextView
+                android:id="@+id/startpoint_coord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/startpoint_display"/>
 
         </RelativeLayout>
 

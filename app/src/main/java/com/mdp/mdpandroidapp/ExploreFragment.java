@@ -2,6 +2,7 @@ package com.mdp.mdpandroidapp;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -16,7 +17,6 @@ import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -25,7 +25,7 @@ public class ExploreFragment extends Fragment {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothConnectionService mBluetoothConnectionService;
 
-    // algo buttons
+    // algo portion
     private Button fastpath_button;
     private Button explore_button;
     private Button auto_button;
@@ -34,21 +34,29 @@ public class ExploreFragment extends Fragment {
     private Button cancel_button;
     private TextView algo_mode;
 
-    // wp sp buttons
+    // wp sp portion
     private Button waypoint_button;
     private Button startpoint_button;
     private Button reset_button;
     private TextView button_status;
-    private Arena mArena;
-
     int mode = 0;
     static final int ModeWayPoint = 1;
     static final int ModeStartPoint = 2;
     static final int ModeIdle =0;
 
+    // arena portion
+    private Arena mArena;
+
     // class variable for waypoint and startpoint
+    private TextView waypoint_coord;
+    private TextView startpoint_coord;
     int wayPointId = 0;
     int startPointId = 0;
+    String wp_str = "-";
+    String sp_str = "-";
+    SharedPreferences wp_sp;
+    SharedPreferences sp_sp;
+    public static final String DEFAULTCOORD = "-";
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -62,11 +70,6 @@ public class ExploreFragment extends Fragment {
         // Inflate the layout for this fragment
         final View exploreView = inflater.inflate(R.layout.fragment_explore, container, false);
 
-        waypoint_button = exploreView.findViewById(R.id.waypoint_button);
-        startpoint_button = exploreView.findViewById(R.id.startpoint_button);
-        reset_button = exploreView.findViewById(R.id.reset_button);
-        button_status = exploreView.findViewById(R.id.button_status);
-        button_status.setText("None");
         fastpath_button = exploreView.findViewById(R.id.fastpath_button);
         explore_button = exploreView.findViewById(R.id.explore_button);
         auto_button = exploreView.findViewById(R.id.auto_button);
@@ -74,6 +77,88 @@ public class ExploreFragment extends Fragment {
         update_button = exploreView.findViewById(R.id.update_button);
         cancel_button = exploreView.findViewById(R.id.cancel_button);
         algo_mode = exploreView.findViewById(R.id.algo_mode);
+
+        waypoint_button = exploreView.findViewById(R.id.waypoint_button);
+        startpoint_button = exploreView.findViewById(R.id.startpoint_button);
+        reset_button = exploreView.findViewById(R.id.reset_button);
+        button_status = exploreView.findViewById(R.id.button_status);
+        button_status.setText("None");
+
+        waypoint_coord = exploreView.findViewById(R.id.waypoint_coord);
+        wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
+        wp_str = wp_sp.getString("wp_sp", DEFAULTCOORD);
+        waypoint_coord.setText(wp_str);
+        startpoint_coord = exploreView.findViewById(R.id.startpoint_coord);
+        sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
+        sp_str = sp_sp.getString("sp_sp", DEFAULTCOORD);
+        startpoint_coord.setText(sp_str);
+
+        fastpath_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // execute fastest path algo
+                fastpath_button.setEnabled(false);
+                explore_button.setEnabled(false);
+                cancel_button.setEnabled(true);
+                algo_mode.setText("Fastest Path");
+            }
+        });
+
+        explore_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // execute exploration algo
+                explore_button.setEnabled(false);
+                fastpath_button.setEnabled(false);
+                auto_button.setEnabled(true);
+                manual_button.setEnabled(true);
+                cancel_button.setEnabled(true);
+                algo_mode.setText("Explore\n\nAuto");
+            }
+        });
+
+        auto_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // auto update arduino position on gridlayout
+
+                update_button.setEnabled(false);
+                algo_mode.setText("Explore\n\nAuto");
+            }
+        });
+
+        manual_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // stop auto updating (if it is auto updating)
+
+                update_button.setEnabled(true);
+                algo_mode.setText("Explore\n\nManual");
+            }
+        });
+
+        update_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // updates gridlayout whenever this button is pressed
+            }
+        });
+
+        cancel_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // end current algorithm
+
+                fastpath_button.setEnabled(true);
+                explore_button.setEnabled(true);
+                auto_button.setEnabled(false);
+                manual_button.setEnabled(false);
+                update_button.setEnabled(false);
+                cancel_button.setEnabled(false);
+                algo_mode.setText("Stationary");
+
+            }
+        });
 
         waypoint_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,76 +210,22 @@ public class ExploreFragment extends Fragment {
                 update_button.setEnabled(false);
                 cancel_button.setEnabled(false);
                 algo_mode.setText("Stationary");
+
+                wp_str = "-";
+                sp_str = "-";
+                wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
+                SharedPreferences.Editor edit_wp_sp = wp_sp.edit();
+                edit_wp_sp.putString("wp_sp", DEFAULTCOORD);
+                edit_wp_sp.commit();
+                waypoint_coord.setText(wp_str);
+                sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
+                SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
+                edit_sp_sp.putString("sp_sp", DEFAULTCOORD);
+                edit_sp_sp.commit();
+                startpoint_coord.setText(sp_str);
             }
         });
 
-        fastpath_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // execute fastest path algo
-
-                fastpath_button.setEnabled(false);
-                explore_button.setEnabled(false);
-                cancel_button.setEnabled(true);
-                algo_mode.setText("Fastest Path");
-            }
-        });
-
-        explore_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // execute exploration algo
-
-                explore_button.setEnabled(false);
-                fastpath_button.setEnabled(false);
-                auto_button.setEnabled(true);
-                manual_button.setEnabled(true);
-                cancel_button.setEnabled(true);
-                algo_mode.setText("Explore\n\nAuto");
-            }
-        });
-
-        auto_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // auto update arduino position on gridlayout
-
-                update_button.setEnabled(false);
-                algo_mode.setText("Explore\n\nAuto");
-            }
-        });
-
-        manual_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // stop auto updating (if it is auto updating)
-
-                update_button.setEnabled(true);
-                algo_mode.setText("Explore\n\nManual");
-            }
-        });
-
-        update_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // updates gridlayout whenever this button is pressed
-            }
-        });
-
-        cancel_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // end current algorithm
-
-                fastpath_button.setEnabled(true);
-                explore_button.setEnabled(true);
-                auto_button.setEnabled(false);
-                manual_button.setEnabled(false);
-                update_button.setEnabled(false);
-                cancel_button.setEnabled(false);
-                algo_mode.setText("Stationary");
-            }
-        });
         return exploreView;
     }
 
@@ -263,37 +294,38 @@ public class ExploreFragment extends Fragment {
                     }
 
                     final Integer finalmCount = mCount;
-                    grid.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            switch(mode){
-                                case ModeIdle:
-                                    break;
-                                case ModeWayPoint:
-                                    if (gridId == startPointId){
-                                        removeStartPoint(startPointId);
-                                    }
-                                    removeWayPoint(wayPointId);
-                                    setWayPoint(gridId);
-                                    break;
-                                case ModeStartPoint:
-                                    if (gridId == wayPointId){
+                    if (!(mCol == 0 || mRow == 0)) {
+                        grid.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                switch (mode) {
+                                    case ModeIdle:
+                                        break;
+                                    case ModeWayPoint:
+                                        if (gridId == startPointId) {
+                                            removeStartPoint(startPointId);
+                                        }
                                         removeWayPoint(wayPointId);
-                                    }
-                                    removeStartPoint(startPointId);
-                                    setStartPoint(gridId);
-                                    break;
+                                        setWayPoint(gridId);
+                                        break;
+                                    case ModeStartPoint:
+                                        if (gridId == wayPointId) {
+                                            removeWayPoint(wayPointId);
+                                        }
+                                        removeStartPoint(startPointId);
+                                        setStartPoint(gridId);
+                                        break;
+                                }
+                                if (startPointId != 0 && wayPointId != 0) {
+                                    fastpath_button.setEnabled(true);
+                                    explore_button.setEnabled(true);
+                                } else {
+                                    fastpath_button.setEnabled(false);
+                                    explore_button.setEnabled(false);
+                                }
                             }
-                            if (startPointId != 0 && wayPointId != 0) {
-                                fastpath_button.setEnabled(true);
-                                explore_button.setEnabled(true);
-                            }
-                            else {
-                                fastpath_button.setEnabled(false);
-                                explore_button.setEnabled(false);
-                            }
-                        }
-                    });
+                        });
+                    }
                     mArena.addView(grid);
                     mCount++;
                 }
@@ -312,14 +344,27 @@ public class ExploreFragment extends Fragment {
             mArena.getChildAt(id).setBackground(background);
 
             wayPointId = 0;
+            wp_str = "-";
+            waypoint_coord.setText("-");
+            wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit_wp_sp = wp_sp.edit();
+            edit_wp_sp.putString("wp_sp", DEFAULTCOORD);
+            edit_wp_sp.commit();
         }
 
         private void setWayPoint(Integer id) {
-            wayPointId=id;
+            wayPointId = id;
             GradientDrawable background = new GradientDrawable();
             background.setColor(Color.parseColor("#FF0000"));
-            background.setStroke(1,Color.parseColor("#000000"));
+            background.setStroke(1, Color.parseColor("#000000"));
             mArena.getChildAt(id).setBackground(background);
+
+            wp_str = "(" + (getRow(id) - 1) + ", " + (getCol(id) - 1) + ")";
+            waypoint_coord.setText(wp_str);
+            wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit_wp_sp = wp_sp.edit();
+            edit_wp_sp.putString("wp_sp", wp_str);
+            edit_wp_sp.commit();
         }
 
         private void removeStartPoint(int id) {
@@ -356,6 +401,12 @@ public class ExploreFragment extends Fragment {
             }
 
             startPointId = 0;
+            sp_str = "-";
+            startpoint_coord.setText("-");
+            sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
+            edit_sp_sp.putString("sp_sp", DEFAULTCOORD);
+            edit_sp_sp.commit();
         }
 
         private void setStartPoint(Integer id) {
@@ -384,12 +435,17 @@ public class ExploreFragment extends Fragment {
                     mArena.getChildAt(surrounding_list[i]).setBackground(faded_background);
                 }
             }
+            sp_str = "(" + (getRow(id) - 1) + ", " + (getCol(id) - 1) + ")";
+            startpoint_coord.setText(sp_str);
+            sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
+            edit_sp_sp.putString("sp_sp", sp_str);
+            edit_sp_sp.commit();
         }
 
         private int getRow(Integer mCount) {
             return 20-mCount/16;
         }
-
         private int getCol(Integer mCount) {
             return mCount%16;
         }
