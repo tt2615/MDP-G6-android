@@ -61,7 +61,7 @@ public class ExploreFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        mBluetoothAdapter = ((MainActivity)getActivity()).ge
+        mBluetoothAdapter = ((MainActivity)getActivity()).getB
     }
 
     @Override
