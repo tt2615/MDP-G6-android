@@ -4,12 +4,16 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,10 +49,11 @@ public class ExploreFragment extends Fragment {
     private TextView algo_mode;
 
     private boolean manual_display_mode = false;
-    private ArrayList<Integer> obstacleId;
-    private ArrayList<Integer> normalTerrainId;
-    private ArrayList<Integer[]> arrowId;
-    private Integer positionId;
+    private Integer positionId = 0;
+    private Integer oldPositionId;
+    private ArrayList<Integer> obstacleId = new ArrayList<Integer>();
+    private ArrayList<Integer> normalTerrainId = new ArrayList<Integer>();
+    private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>();
 
     // wp sp portion
     private Button waypoint_button;
@@ -80,15 +85,12 @@ public class ExploreFragment extends Fragment {
         mBluetoothAdapter = ((MainActivity)getActivity()).getBluetoothAdapter();
         mBluetoothConnectionService = ((MainActivity)getActivity()).getBluetoothConnectionService();
         mBluetoothConnectionService.registerNewHandlerCallback(bluetoothServiceMessageHandler);
-//        getContext().getSharedPreferences("wp_sp", 0).edit().clear().commit();
-//        getContext().getSharedPreferences("sp_sp", 0).edit().clear().commit();
     }
 
     private final Handler.Callback bluetoothServiceMessageHandler = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
             try {
-
                 switch (message.what) {
                     case BluetoothConnectionService.MESSAGE_READ:
                         //  Reading message from remote device
@@ -98,23 +100,23 @@ public class ExploreFragment extends Fragment {
                             case "po":
                                 int po_x = Integer.parseInt(coordinates[1]);
                                 int po_y = Integer.parseInt(coordinates[2]);
-                                Log.d(TAG,"android position at: "+po_x+","+po_y);
+                                Log.d(TAG,"android position at: " + po_x + "," + po_y);
                                 updatePosition(po_x,po_y);
-                                mDeviceMessagesListAdapter.add("android position at: "+po_x+","+po_y);
-                                break;
-                            case "nt":
-                                int nt_x = Integer.parseInt(coordinates[1]);
-                                int nt_y = Integer.parseInt(coordinates[2]);
-                                Log.d(TAG,"discovered normal terrain at: "+nt_x+","+nt_y);
-                                discoverNormalTerrain(nt_x,nt_y);
-                                mDeviceMessagesListAdapter.add("discovered normal terrain at: "+nt_x+","+nt_y);
+                                mDeviceMessagesListAdapter.add("android position at: " + po_x + "," + po_y);
                                 break;
                             case "ob":
                                 int ob_x = Integer.parseInt(coordinates[1]);
                                 int ob_y = Integer.parseInt(coordinates[2]);
                                 Log.d(TAG,"discovered obstacle: "+ob_x+","+ob_y);
                                 discoverObstacle(ob_x,ob_y);
-                                mDeviceMessagesListAdapter.add("discovered obstacle at: "+ob_x+","+ob_y);
+                                mDeviceMessagesListAdapter.add("discovered obstacle at: " + ob_x + "," + ob_y);
+                                break;
+                            case "nt":
+                                int nt_x = Integer.parseInt(coordinates[1]);
+                                int nt_y = Integer.parseInt(coordinates[2]);
+                                Log.d(TAG,"discovered normal terrain at: "+nt_x+","+nt_y);
+                                discoverNormalTerrain(nt_x,nt_y);
+                                mDeviceMessagesListAdapter.add("discovered normal terrain at: " + nt_x + "," + nt_y);
                                 break;
                             case "ar":
                                 int ar_x = Integer.parseInt(coordinates[1]);
@@ -122,7 +124,7 @@ public class ExploreFragment extends Fragment {
                                 char ar_dir = coordinates[3].charAt(0);;
                                 Log.d(TAG,"discovered arrow: "+ar_x+","+ar_y+","+ar_dir);
                                 discoverArrow(ar_x,ar_y,ar_dir);
-                                mDeviceMessagesListAdapter.add("discovered arrow: "+ar_x+","+ar_y+","+ar_dir);
+                                mDeviceMessagesListAdapter.add("discovered arrow: " + ar_x + "," + ar_y + "," + ar_dir);
                                 break;
                         }
                         return false;
@@ -135,23 +137,24 @@ public class ExploreFragment extends Fragment {
     };
 
     private void updatePosition(int po_x, int po_y){
-        positionId = corToId(po_x,po_y);
+        oldPositionId = positionId;
+        positionId = corToId(po_x, po_y);
         if(!manual_display_mode){
             mArena.showArduinoPosition();
         }
     }
 
-    private void discoverNormalTerrain(int nt_x, int nt_y) {
-        normalTerrainId.add(corToId(nt_x,nt_y));
-        if(!manual_display_mode){
-            mArena.showNormalTerrain();
+    private void discoverObstacle(int ob_x, int ob_y) {
+        obstacleId.add(corToId(ob_x, ob_y));
+        if(!manual_display_mode) {
+            mArena.showObstacles();
         }
     }
 
-    private void discoverObstacle(int ob_x, int ob_y) {
-        obstacleId.add(corToId(ob_x,ob_y));
-        if(!manual_display_mode) {
-            mArena.showObstacles();
+    private void discoverNormalTerrain(int nt_x, int nt_y) {
+        normalTerrainId.add(corToId(nt_x, nt_y));
+        if(!manual_display_mode){
+            mArena.showNormalTerrain();
         }
     }
 
@@ -164,15 +167,9 @@ public class ExploreFragment extends Fragment {
     }
 
     private Integer corToId(int po_x, int po_y) {
-        Integer cor=(po_x+1)+(19-po_y)*16;
+        Integer cor=(po_x + 1) + (19 - po_y) * 16;
         return cor;
     }
-
-
-
-
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
@@ -184,7 +181,6 @@ public class ExploreFragment extends Fragment {
         startpoint_button = exploreView.findViewById(R.id.startpoint_button);
         reset_button = exploreView.findViewById(R.id.reset_button);
         button_status = exploreView.findViewById(R.id.button_status);
-        button_status.setText("None");
         fastpath_button = exploreView.findViewById(R.id.fastpath_button);
         explore_button = exploreView.findViewById(R.id.explore_button);
         auto_button = exploreView.findViewById(R.id.auto_button);
@@ -193,59 +189,9 @@ public class ExploreFragment extends Fragment {
         cancel_button = exploreView.findViewById(R.id.cancel_button);
         algo_mode = exploreView.findViewById(R.id.algo_mode);
 
-        waypoint_button = exploreView.findViewById(R.id.waypoint_button);
-        startpoint_button = exploreView.findViewById(R.id.startpoint_button);
-        reset_button = exploreView.findViewById(R.id.reset_button);
-        button_status = exploreView.findViewById(R.id.button_status);
-        button_status.setText("None");
         mDeviceMessages = (ListView) exploreView.findViewById(R.id.MsgReceived);
         mDeviceMessagesListAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mDeviceMessages.setAdapter(mDeviceMessagesListAdapter);
-
-        waypoint_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mode!=ModeWayPoint) {
-                    set_mode(ModeWayPoint);
-                    waypoint_button.setText("Back To Idle");
-                    startpoint_button.setText("StartPoint");
-                }
-                else {
-                    set_mode(ModeIdle);
-                    waypoint_button.setText("WayPoint");
-                }
-            }
-        });
-
-        startpoint_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mode!=ModeStartPoint) {
-                    set_mode(ModeStartPoint);
-                    startpoint_button.setText("Back To Idle");
-                    waypoint_button.setText("WayPoint");
-                }
-                else {
-                    set_mode(ModeIdle);
-                    startpoint_button.setText("StartPoint");
-                }
-            }
-        });
-
-        reset_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mArena.removeStartPoint(startPointId);
-                mArena.removeWayPoint(wayPointId);
-                set_mode(ModeIdle);
-                button_status.setText("None");
-                startpoint_button.setText("StartPoint");
-                waypoint_button.setText("WayPoint");
-
-                wayPointId = 0;
-                startPointId = 0;
-            }
-        });
 
         waypoint_coord = exploreView.findViewById(R.id.waypoint_coord);
         wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
@@ -305,6 +251,12 @@ public class ExploreFragment extends Fragment {
                 algo_mode.setText("Explore\n\nAuto");
 
                 manual_display_mode = false;
+//                while (!manual_display_mode) {
+//                    mArena.showNormalTerrain();
+//                    mArena.showArduinoPosition();
+//                    mArena.showObstacles();
+//                    mArena.showArrows();
+//                }
             }
         });
 
@@ -323,10 +275,10 @@ public class ExploreFragment extends Fragment {
         update_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // updates gridlayout whenever this button is pressed
+                // updates gridlayout whenever this button is pressed, IN ORDER OF PRIORITY
+                mArena.showNormalTerrain();
                 mArena.showArduinoPosition();
                 mArena.showObstacles();
-                mArena.showNormalTerrain();
                 mArena.showArrows();
             }
         });
@@ -445,6 +397,14 @@ public class ExploreFragment extends Fragment {
         GridLayout arenaLayout = (GridLayout)getActivity().findViewById(R.id.arena);
         Log.d("EFragment","checkpoint:"+Boolean.toString(arenaLayout==null));
         mArena = new Arena(getActivity(),arenaLayout);
+
+        if (wayPointId > 0 && wayPointId <= 320) {
+            mArena.setColor(wayPointId, "#FF0000", false, "");
+        }
+
+        if (startPointId > 0 && startPointId <= 320) {
+            mArena.setColor(startPointId, "#00FF00", true, "#CCFFCC");
+        }
     }
 
     private class Arena {
@@ -471,6 +431,7 @@ public class ExploreFragment extends Fragment {
                     grid.setId(mCount);
                     grid.setWidth(40);
                     grid.setHeight(40);
+                    grid.setGravity(Gravity.CENTER_HORIZONTAL);
 
                     final int gridId = grid.getId();
                     mCol = getCol(mCount);
@@ -511,7 +472,7 @@ public class ExploreFragment extends Fragment {
                                         setStartPoint(gridId);
                                         break;
                                 }
-                                if (startPointId != 0 && wayPointId != 0) {
+                                if (startPointId != 0 && wayPointId != 0) { //todo change condition
                                     fastpath_button.setEnabled(true);
                                     explore_button.setEnabled(true);
                                 } else {
@@ -529,15 +490,7 @@ public class ExploreFragment extends Fragment {
         }
 
         private void removeWayPoint(int id) {
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.parseColor("#FFFFFF"));
-            if (id%16 <= 0 || id >= 320){
-                background.setStroke(1,Color.parseColor("#FFFFFF"));
-            }
-            else {
-                background.setStroke(1,Color.parseColor("#000000"));
-            }
-            mmArena.getChildAt(id).setBackground(background);
+            setColor(wayPointId, "#FFFFFF", false, "");
 
             wayPointId = 0;
             wp_str = "-";
@@ -551,12 +504,9 @@ public class ExploreFragment extends Fragment {
 
         private void setWayPoint(Integer id) {
             wayPointId = id;
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.parseColor("#FF0000"));
-            background.setStroke(1, Color.parseColor("#000000"));
-            mmArena.getChildAt(id).setBackground(background);
+            setColor(wayPointId, "#FF0000", false, "");
 
-            wp_str = "(" + (getRow(id) - 1) + ", " + (getCol(id) - 1) + ")";
+            wp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             waypoint_coord.setText(wp_str);
 
             wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
@@ -566,38 +516,9 @@ public class ExploreFragment extends Fragment {
         }
 
         private void removeStartPoint(int id) {
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.parseColor("#FFFFFF"));
-            if (id%16 == 0 || id >= 320){
-                background.setStroke(1,Color.parseColor("#FFFFFF"));
-            }
-            else {
-                background.setStroke(1,Color.parseColor("#000000"));
-            }
-            mmArena.getChildAt(id).setBackground(background);
+            setColor(startPointId, "#FFFFFF", true, "#FFFFFF");
 
-            int surrounding_list[] = new int[8];
-            surrounding_list[0] = id - 17;
-            surrounding_list[1] = id - 16;
-            surrounding_list[2] = id - 15;
-            surrounding_list[3] = id - 1;
-            surrounding_list[4] = id + 1;
-            surrounding_list[5] = id + 15;
-            surrounding_list[6] = id + 16;
-            surrounding_list[7] = id + 17;
-
-            if (id != 0) {
-                for (int i = 0; i < surrounding_list.length; i++) {
-                    if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320 || surrounding_list[i] == wayPointId) {
-                    } else {
-                        GradientDrawable faded_background = new GradientDrawable();
-                        faded_background.setColor(Color.parseColor("#FFFFFF"));
-                        faded_background.setStroke(1, Color.parseColor("#000000"));
-                        mmArena.getChildAt(surrounding_list[i]).setBackground(faded_background);
-                    }
-                }
-            }
-
+            startPointId = 0;
             sp_str = "-";
             startpoint_coord.setText("-");
 
@@ -609,31 +530,9 @@ public class ExploreFragment extends Fragment {
 
         private void setStartPoint(Integer id) {
             startPointId = id;
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.parseColor("#00FF00"));
-            background.setStroke(1, Color.parseColor("#000000"));
-            mmArena.getChildAt(startPointId).setBackground(background);
+            setColor(startPointId, "#00FF00", true, "#CCFFCC");
 
-            int surrounding_list[] = new int[8];
-            surrounding_list[0] = id - 17;
-            surrounding_list[1] = id - 16;
-            surrounding_list[2] = id - 15;
-            surrounding_list[3] = id - 1;
-            surrounding_list[4] = id + 1;
-            surrounding_list[5] = id + 15;
-            surrounding_list[6] = id + 16;
-            surrounding_list[7] = id + 17;
-
-            for (int i = 0; i < surrounding_list.length; i++) {
-                if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320 || surrounding_list[i] == wayPointId) {
-                } else {
-                    GradientDrawable faded_background = new GradientDrawable();
-                    faded_background.setColor(Color.parseColor("#99ff99"));
-                    faded_background.setStroke(1, Color.parseColor("#000000"));
-                    mmArena.getChildAt(surrounding_list[i]).setBackground(faded_background);
-                }
-            }
-            sp_str = "(" + (getRow(id) - 1) + ", " + (getCol(id) - 1) + ")";
+            sp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             startpoint_coord.setText(sp_str);
 
             sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
@@ -642,29 +541,96 @@ public class ExploreFragment extends Fragment {
             edit_sp_sp.commit();
         }
 
+        public void showNormalTerrain() {
+            for(Integer i: normalTerrainId){
+                setColor(i, "#CCCCCC", false, "");
+            }
+        }
+
         private void showArduinoPosition() {
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.parseColor("#00FF00"));
-            background.setStroke(1, Color.parseColor("#000000"));
-            mmArena.getChildAt(positionId).setBackground(background);
+            if (oldPositionId == 0) {
+            }
+            else {
+                setColor(oldPositionId, "#FFFFFF", true, "#FFFFFF");
+            }
+            setColor(startPointId, "#00FF00", true, "#CCFFCC");
+            setColor(positionId, "#7EC0EE", true, "#7EC0EE");
+            setColor(wayPointId, "#FF0000", false, "");
+        }
 
-            int surrounding_list[] = new int[8];
-            surrounding_list[0] = positionId - 17;
-            surrounding_list[1] = positionId - 16;
-            surrounding_list[2] = positionId - 15;
-            surrounding_list[3] = positionId - 1;
-            surrounding_list[4] = positionId + 1;
-            surrounding_list[5] = positionId + 15;
-            surrounding_list[6] = positionId + 16;
-            surrounding_list[7] = positionId + 17;
+        public void showObstacles() {
+            for (Integer i: obstacleId){
+                setColor(i, "#000000", false, "");
+            }
+        }
 
-            for (int i = 0; i < surrounding_list.length; i++) {
-                if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320 || surrounding_list[i] == wayPointId) {
-                } else {
-                    GradientDrawable faded_background = new GradientDrawable();
-                    faded_background.setColor(Color.parseColor("#99ff99"));
-                    faded_background.setStroke(1, Color.parseColor("#000000"));
-                    mmArena.getChildAt(surrounding_list[i]).setBackground(faded_background);
+        public void showArrows() {
+            for(Integer[] i: arrowId){
+                GradientDrawable background = new GradientDrawable();
+                background.setStroke(1, Color.parseColor("#000000"));
+                Integer cor = i[0];
+                Integer dir = i[1];
+                switch (dir){
+                    //u
+                    case 30:
+                        Drawable arrow_u = ResourcesCompat.getDrawable(getResources(), R.drawable.arrow_u, null);
+                        mmArena.getChildAt(cor).setBackground(arrow_u);
+                        break;
+                    //d
+                    case 13:
+                        Drawable arrow_d = ContextCompat.getDrawable(getActivity(), R.drawable.arrow_d);
+                        mmArena.getChildAt(cor).setBackground(arrow_d);
+                        break;
+                    //l
+                    case 21:
+                        Drawable arrow_l = ContextCompat.getDrawable(getActivity(), R.drawable.arrow_l);
+                        mmArena.getChildAt(cor).setBackground(arrow_l);
+                        break;
+                    //r
+                    case 27:
+                        Drawable arrow_r = ContextCompat.getDrawable(getActivity(), R.drawable.arrow_r);
+                        mmArena.getChildAt(cor).setBackground(arrow_r);
+                        break;
+                }
+            }
+        }
+
+        public void setColor(int id, String bgColour, boolean border, String bbgColour) {
+            if (!border) {
+                GradientDrawable background = new GradientDrawable();
+                background.setColor(Color.parseColor(bgColour));
+                background.setStroke(1, Color.parseColor("#000000"));
+                mmArena.getChildAt(id).setBackground(background);
+            } else if (border) {
+
+                GradientDrawable background = new GradientDrawable();
+                background.setColor(Color.parseColor(bgColour));
+                if (id%16 == 0 || id >= 320){
+                    background.setStroke(1,Color.parseColor("#FFFFFF"));
+                }
+                else {
+                    background.setStroke(1,Color.parseColor("#000000"));
+                }
+                mmArena.getChildAt(id).setBackground(background);
+
+                int[] surrounding_list = new int[8];
+                surrounding_list[0] = id - 17;
+                surrounding_list[1] = id - 16;
+                surrounding_list[2] = id - 15;
+                surrounding_list[3] = id - 1;
+                surrounding_list[4] = id + 1;
+                surrounding_list[5] = id + 15;
+                surrounding_list[6] = id + 16;
+                surrounding_list[7] = id + 17;
+
+                for (int i = 0; i < surrounding_list.length; i++) {
+                    if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320) {
+                    } else {
+                        GradientDrawable border_background = new GradientDrawable();
+                        border_background.setColor(Color.parseColor(bbgColour));
+                        border_background.setStroke(1, Color.parseColor("#000000"));
+                        mmArena.getChildAt(surrounding_list[i]).setBackground(border_background);
+                    }
                 }
             }
         }
@@ -674,53 +640,6 @@ public class ExploreFragment extends Fragment {
         }
         private int getCol(Integer mCount) {
             return mCount%16;
-        }
-
-        public void showObstacles() {
-            for (Integer i: obstacleId){
-                GradientDrawable background = new GradientDrawable();
-                background.setColor(Color.parseColor("#0000FF"));
-                background.setStroke(1, Color.parseColor("#000000"));
-                mmArena.getChildAt(positionId).setBackground(background);
-            }
-        }
-
-        public void showNormalTerrain() {
-            for(Integer i:normalTerrainId){
-                GradientDrawable background = new GradientDrawable();
-                background.setColor(Color.parseColor("#00000F"));
-                background.setStroke(1, Color.parseColor("#000000"));
-                mmArena.getChildAt(positionId).setBackground(background);
-            }
-        }
-
-
-        public void showArrows() {
-            for(Integer[] i:arrowId){
-                GradientDrawable background = new GradientDrawable();
-                background.setStroke(1, Color.parseColor("#000000"));
-                Integer cor = i[0];
-                Integer dir = i[1];
-                switch (dir){
-                    //todo: arrow images
-                    //u
-                    case 117:
-                        background.setColor(Color.parseColor("#00000F"));
-                        break;
-                    //d
-                    case 100:
-                        background.setColor(Color.parseColor("#00000F"));
-                        break;
-                    //l
-                    case 108:
-                        background.setColor(Color.parseColor("#00000F"));
-                        break;
-                    //r
-                    case 114:
-                        background.setColor(Color.parseColor("#00000F"));
-                        break;
-                }
-            }
         }
     }
 }
