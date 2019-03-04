@@ -1,4 +1,3 @@
-//todo tell the arduino that free-moving mode is enabled
 //todo filter connect mac addresses
 //todo remove b' ' from incoming rpi message
 
@@ -97,10 +96,10 @@ public class ControlFragment extends Fragment {
                         String receivedMessage = message.obj.toString();
                         switch (receivedMessage){
                             case "sl":
-                                mArduinoState.setText("strafing left");
+                                mArduinoState.setText("moving left");
                                 break;
                             case "sr":
-                                mArduinoState.setText("strafing right");
+                                mArduinoState.setText("moving right");
                                 break;
                             case "mf":
                                 mArduinoState.setText("moving forward");
