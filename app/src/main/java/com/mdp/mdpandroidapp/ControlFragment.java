@@ -1,3 +1,7 @@
+//todo tell the arduino that free-moving mode is enabled
+//todo filter connect mac addresses
+//todo remove b' ' from incoming rpi message
+
 package com.mdp.mdpandroidapp;
 
 import android.os.Bundle;
@@ -11,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.mdp.mdpandroidapp.BluetoothConnectionService;
+
 public class ControlFragment extends Fragment {
 
     private final String TAG = "ControlFragment";
@@ -18,7 +24,7 @@ public class ControlFragment extends Fragment {
     private BluetoothConnectionService mBluetoothConnectionService;
 
     private TextView mArduinoState;
-    private Button mBtnFw, mBtnTr, mBtnTl;
+    private Button mBtnFw, mBtnTr, mBtnTl, mBtnTb;
 
 
     public ControlFragment() {
@@ -44,11 +50,12 @@ public class ControlFragment extends Fragment {
         mBtnFw = (Button)rootView.findViewById(R.id.btnForward);
         mBtnTr = (Button)rootView.findViewById(R.id.btnTurnRight);
         mBtnTl = (Button)rootView.findViewById(R.id.btnTurnLeft);
+        mBtnTb = (Button)rootView.findViewById(R.id.btnBackward);
 
         mBtnFw.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                String message = "mf";
+                String message = "AD 0,0,10;";
                 mBluetoothConnectionService.write(message.getBytes());
             }
         });
@@ -56,7 +63,7 @@ public class ControlFragment extends Fragment {
         mBtnTr.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                String message = "sr";
+                String message = "AD 0,1,10;";
                  mBluetoothConnectionService.write(message.getBytes());
             }
         });
@@ -64,7 +71,15 @@ public class ControlFragment extends Fragment {
         mBtnTl.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                String message = "sl";
+                String message = "AD 0,-1,10;";
+                mBluetoothConnectionService.write(message.getBytes());
+            }
+        });
+
+        mBtnTb.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                String message = "AD 0,2,10;";
                 mBluetoothConnectionService.write(message.getBytes());
             }
         });
@@ -89,6 +104,9 @@ public class ControlFragment extends Fragment {
                                 break;
                             case "mf":
                                 mArduinoState.setText("moving forward");
+                                break;
+                            case "mb":
+                                mArduinoState.setText("moving backward");
                                 break;
                             case "nm":
                                 mArduinoState.setText("not moving");

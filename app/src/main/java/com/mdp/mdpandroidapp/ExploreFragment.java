@@ -1,3 +1,6 @@
+// todo selected x and y coords for wp and sp must be sent to the amd tool as a string
+// todo head pointer for robot
+
 package com.mdp.mdpandroidapp;
 
 import android.bluetooth.BluetoothAdapter;
@@ -218,7 +221,7 @@ public class ExploreFragment extends Fragment {
                 mBluetoothConnectionService.write(start_point_message.getBytes());
                 String way_point_message = "wp[" + getCol(wayPointId).toString() + ", " +  getRow(wayPointId).toString() +"]";
                 mBluetoothConnectionService.write(way_point_message.getBytes());
-                String start_message = "st[1]";
+                String start_message = "AL fp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
             }
         });
@@ -236,7 +239,7 @@ public class ExploreFragment extends Fragment {
 
                 String start_point_message = "sp[" + ((Integer)(mArena.getCol(startPointId) - 1)).toString() + ", " +  ((Integer)(mArena.getRow(startPointId) - 1)).toString() +"]";
                 mBluetoothConnectionService.write(start_point_message.getBytes());
-                String start_message = "st[0]";
+                String start_message = "AL exp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
 
             }
@@ -431,7 +434,7 @@ public class ExploreFragment extends Fragment {
                     grid.setId(mCount);
                     grid.setWidth(40);
                     grid.setHeight(40);
-                    grid.setGravity(Gravity.CENTER_HORIZONTAL);
+                    grid.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
 
                     final int gridId = grid.getId();
                     mCol = getCol(mCount);
