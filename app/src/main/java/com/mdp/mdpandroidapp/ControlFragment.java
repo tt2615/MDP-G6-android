@@ -90,12 +90,13 @@ public class ControlFragment extends Fragment {
                 switch (message.what) {
                     case BluetoothConnectionService.MESSAGE_READ:
                         //  Reading message from remote device
-                        String receivedMessage = message.obj.toString();
+                        String receivedMessagetmp = message.obj.toString();
+                        String receivedMessage = receivedMessagetmp.substring(2, receivedMessagetmp.length() - 2);
                         switch (receivedMessage){
-                            case "sl":
+                            case "ml": // todo checklist #4 robot status
                                 mArduinoState.setText("moving left");
                                 break;
-                            case "sr":
+                            case "mr":
                                 mArduinoState.setText("moving right");
                                 break;
                             case "mf":

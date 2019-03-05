@@ -1,4 +1,3 @@
-// todo selected x and y coords for wp and sp must be sent to the amd tool as a string
 // todo deal with null mapdesc strings
 // todo flow of algo -> explore to fastpath
 // todo json for amdtool (send and receive MDS)
@@ -541,6 +540,9 @@ public class ExploreFragment extends Fragment {
             SharedPreferences.Editor edit_wp_sp = wp_sp.edit();
             edit_wp_sp.putInt("wp_sp", wayPointId);
             edit_wp_sp.commit();
+
+            String wp_msg = "WayPoint Coordinates: " + (getCol(wayPointId)-1) + "," + (getRow(wayPointId)-1);
+            mBluetoothConnectionService.write(wp_msg.getBytes());
         }
 
         private void removeStartPoint(int id) {
