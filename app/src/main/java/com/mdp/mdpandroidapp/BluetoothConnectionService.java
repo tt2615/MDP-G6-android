@@ -308,6 +308,16 @@ public class BluetoothConnectionService {
 
             int bytes; // bytes returned from read()
 
+            class IndicateAlive extends TimerTask {
+                public void run() {
+                    Log.d(TAG,"instantiate timer task");
+                    mConnectedThread.write("RP Z".getBytes());
+                }
+            }
+
+            Timer timer = new Timer();
+            timer.schedule(new IndicateAlive(), 0, 4000);
+
             // Keep listening to the InputStream until an exception occurs
             while (true) {
                 // Read from the InputStream
@@ -321,15 +331,6 @@ public class BluetoothConnectionService {
                     break;
                 }
             }
-
-            class IndicateAlive extends TimerTask {
-                public void run() {
-                    mConnectedThread.write("RP Z".getBytes());
-                }
-            }
-
-            Timer timer = new Timer();
-            timer.schedule(new IndicateAlive(), 0, 4000);
         }
 
 
