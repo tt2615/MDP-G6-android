@@ -60,7 +60,7 @@ public class ExploreFragment extends Fragment {
     private ArrayList<Integer[]> arrowId;
     private String mapDescriptor1;
     private String mapDescriptor2;
-    private char arduinoDir;
+    private char arduinoDir = 'u';
 
     // wp sp portion
     private Button waypoint_button;
@@ -241,7 +241,8 @@ public class ExploreFragment extends Fragment {
         sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
         startPointId = sp_sp.getInt("sp_sp", 0);
         positionId = startPointId;
-
+        String sp_msg = "StartPoint Coordinates: " + getCol(startPointId) + "," + getRow(startPointId);
+        mBluetoothConnectionService.write(sp_msg.getBytes());
         sp_str = "(" + getCol(startPointId).toString() + ", " +  getRow(startPointId).toString() + ")";
         startpoint_coord.setText(sp_str);
 
@@ -566,6 +567,9 @@ public class ExploreFragment extends Fragment {
             SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
             edit_sp_sp.putInt("sp_sp", startPointId);
             edit_sp_sp.commit();
+
+            String sp_msg = "StartPoint Coordinates: " + (getCol(startPointId)-1) + "," + (getRow(startPointId)-1);
+            mBluetoothConnectionService.write(sp_msg.getBytes());
         }
 
         private void showArduinoPosition(char dir) {

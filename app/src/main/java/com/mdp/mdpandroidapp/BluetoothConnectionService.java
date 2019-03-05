@@ -331,7 +331,7 @@ public class BluetoothConnectionService {
             Timer timer = new Timer();
             timer.schedule(new IndicateAlive(), 0, 4000);
         }
-        
+
 
         //Call this from the main activity to send data to the remote device
         void write(byte[] bytes) {
