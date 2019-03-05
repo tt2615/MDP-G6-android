@@ -321,6 +321,15 @@ public class BluetoothConnectionService {
                     break;
                 }
             }
+
+            class IndicateAlive extends TimerTask {
+                public void run() {
+                    mConnectedThread.write("RP Z".getBytes());
+                }
+            }
+
+            Timer timer = new Timer();
+            timer.schedule(new IndicateAlive(), 0, 4000);
         }
         
 
