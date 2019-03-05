@@ -1,5 +1,7 @@
 // todo selected x and y coords for wp and sp must be sent to the amd tool as a string
-// todo head pointer for robot
+// todo deal with null mapdesc strings
+// todo flow of algo -> explore to fastpath
+// todo json for amdtool (send and receive MDS)
 
 package com.mdp.mdpandroidapp;
 
@@ -60,7 +62,6 @@ public class ExploreFragment extends Fragment {
     private String mapDescriptor2;
     private char arduinoDir;
 
-
     // wp sp portion
     private Button waypoint_button;
     private Button startpoint_button;
@@ -102,7 +103,10 @@ public class ExploreFragment extends Fragment {
                     case BluetoothConnectionService.MESSAGE_READ:
                         //  Reading message from remote device
                         String receivedMessage = message.obj.toString();
-                        String[] msg = receivedMessage.split(";");
+                        String msg1 = receivedMessage.substring(2, receivedMessage.length() - 2);
+                        //b'x'
+                        Log.d("msg1", msg1);
+                        String[] msg = msg1.split(";");
                         String[] arduinoPosition = msg[0].split(",");
                         arduinoDir = msg[1].charAt(0);
                         mapDescriptor1 = msg[2];
@@ -171,14 +175,14 @@ public class ExploreFragment extends Fragment {
             Log.d("mapdesc", ((Integer)i).toString());
             int id = posToId(i);
             if(mapDescriptor1Bin.charAt(i)=='0'){
-                mArena.setColor(id,"#CCCCCC",false,"");
+                mArena.setColor(id,"#CCCCCC","single","");
             }
             else if(mapDescriptor1Bin.charAt(i)=='1'){
                 if(mapDescriptor2Bin.charAt(descriptor2Ptr)=='0'){
-                    mArena.setColor(id,"#FFEBCD",false,"");
+                    mArena.setColor(id,"#FFEBCD","single","");
                 }
                 else if (mapDescriptor2Bin.charAt(descriptor2Ptr)=='1'){
-                    mArena.setColor(id,"#000000",false,"");
+                    mArena.setColor(id,"#000000","single","");
                 }
                 descriptor2Ptr++;
                 Log.d("descriptor2Ptr", ((Integer)descriptor2Ptr).toString());
@@ -237,6 +241,7 @@ public class ExploreFragment extends Fragment {
         sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
         startPointId = sp_sp.getInt("sp_sp", 0);
         positionId = startPointId;
+
         sp_str = "(" + getCol(startPointId).toString() + ", " +  getRow(startPointId).toString() + ")";
         startpoint_coord.setText(sp_str);
 
@@ -426,12 +431,8 @@ public class ExploreFragment extends Fragment {
         Log.d("EFragment","checkpoint:"+Boolean.toString(arenaLayout==null));
         mArena = new Arena(getActivity(),arenaLayout);
 
-        if (wayPointId > 0 && wayPointId <= 320) {
-            mArena.setColor(wayPointId, "#FF0000", false, "");
-        }
-
         if (startPointId > 0 && startPointId <= 320) {
-            mArena.setColor(startPointId, "#00FF00", true, "#CCFFCC");
+            mArena.setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
         }
     }
 
@@ -516,7 +517,7 @@ public class ExploreFragment extends Fragment {
         }
 
         private void removeWayPoint(int id) {
-            setColor(wayPointId, "#FFFFFF", false, "");
+            setColor(wayPointId, "#FFFFFF", "single", "");
 
             wayPointId = 0;
             wp_str = "-";
@@ -530,7 +531,7 @@ public class ExploreFragment extends Fragment {
 
         private void setWayPoint(Integer id) {
             wayPointId = id;
-            setColor(wayPointId, "#FF0000", false, "");
+            setColor(wayPointId, "#FF0000", "single", "");
 
             wp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             waypoint_coord.setText(wp_str);
@@ -542,7 +543,7 @@ public class ExploreFragment extends Fragment {
         }
 
         private void removeStartPoint(int id) {
-            setColor(startPointId, "#FFFFFF", true, "#FFFFFF");
+            setColor(startPointId, "#FFFFFF", "bordered", "#FFFFFF");
 
             startPointId = 0;
             sp_str = "-";
@@ -556,7 +557,7 @@ public class ExploreFragment extends Fragment {
 
         private void setStartPoint(Integer id) {
             startPointId = id;
-            setColor(startPointId, "#00FF00", true, "#CCFFCC");
+            setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
 
             sp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             startpoint_coord.setText(sp_str);
@@ -571,11 +572,11 @@ public class ExploreFragment extends Fragment {
             if (oldPositionId == null) {
             }
             else {
-                setColor(oldPositionId, "#FFFFFF", true, "#FFFFFF");
+                setColor(oldPositionId, "#FFFFFF", "bordered", "#FFFFFF");
             }
-            setColor(startPointId, "#00FF00", true, "#CCFFCC");
-            setColor(positionId, "#7EC0EE", true, "#7EC0EE");
-            setColor(wayPointId, "#FF0000", false, "");
+            setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
+            setColor(positionId, "#7EC0EE", "robot", "#7EC0EE");
+            setColor(wayPointId, "#FF0000", "single", "");
 
             //todo: show direction of the arduino
             //todo remove wp in exp
@@ -612,42 +613,100 @@ public class ExploreFragment extends Fragment {
             }
         }
 
-        public void setColor(int id, String bgColour, boolean border, String bbgColour) {
-            if (!border) {
-                GradientDrawable background = new GradientDrawable();
-                background.setColor(Color.parseColor(bgColour));
-                background.setStroke(1, Color.parseColor("#000000"));
-                mmArena.getChildAt(id).setBackground(background);
-            } else if (border) {
-
-                GradientDrawable background = new GradientDrawable();
-                background.setColor(Color.parseColor(bgColour));
-                if (id%16 == 0 || id >= 320){
-                    background.setStroke(1,Color.parseColor("#FFFFFF"));
+        public void setColor(int id, String bgColour, String type, String bbgColour) {
+            switch (type){
+                case ("single"): {
+                    GradientDrawable background = new GradientDrawable();
+                    background.setColor(Color.parseColor(bgColour));
+                    background.setStroke(1, Color.parseColor("#000000"));
+                    mmArena.getChildAt(id).setBackground(background);
+                    break;
                 }
-                else {
-                    background.setStroke(1,Color.parseColor("#000000"));
-                }
-                mmArena.getChildAt(id).setBackground(background);
 
-                int[] surrounding_list = new int[8];
-                surrounding_list[0] = id - 17;
-                surrounding_list[1] = id - 16;
-                surrounding_list[2] = id - 15;
-                surrounding_list[3] = id - 1;
-                surrounding_list[4] = id + 1;
-                surrounding_list[5] = id + 15;
-                surrounding_list[6] = id + 16;
-                surrounding_list[7] = id + 17;
-
-                for (int i = 0; i < surrounding_list.length; i++) {
-                    if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320) {
-                    } else {
-                        GradientDrawable border_background = new GradientDrawable();
-                        border_background.setColor(Color.parseColor(bbgColour));
-                        border_background.setStroke(1, Color.parseColor("#000000"));
-                        mmArena.getChildAt(surrounding_list[i]).setBackground(border_background);
+                case ("bordered"): {
+                    GradientDrawable background = new GradientDrawable();
+                    background.setColor(Color.parseColor(bgColour));
+                    if (id%16 == 0 || id >= 320){
+                        background.setStroke(1,Color.parseColor("#FFFFFF"));
                     }
+                    else {
+                        background.setStroke(1,Color.parseColor("#000000"));
+                    }
+                    mmArena.getChildAt(id).setBackground(background);
+
+                    int[] surrounding_list = new int[8];
+                    surrounding_list[0] = id - 17;
+                    surrounding_list[1] = id - 16;
+                    surrounding_list[2] = id - 15;
+                    surrounding_list[3] = id - 1;
+                    surrounding_list[4] = id + 1;
+                    surrounding_list[5] = id + 15;
+                    surrounding_list[6] = id + 16;
+                    surrounding_list[7] = id + 17;
+
+                    for (int i = 0; i < surrounding_list.length; i++) {
+                        if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320) {
+                        } else {
+                            GradientDrawable border_background = new GradientDrawable();
+                            border_background.setColor(Color.parseColor(bbgColour));
+                            border_background.setStroke(1, Color.parseColor("#000000"));
+                            mmArena.getChildAt(surrounding_list[i]).setBackground(border_background);
+                        }
+                    }
+                    break;
+                }
+
+                case ("robot"): { //todo robot color
+                    GradientDrawable background = new GradientDrawable();
+                    if (id%16 == 0 || id >= 320){
+                        background.setStroke(1,Color.parseColor("#FFFFFF"));
+                    }
+                    else {
+                        background.setStroke(1,Color.parseColor("#000000"));
+                    }
+                    switch (arduinoDir){
+                        //u
+                        case 'u':
+                            Drawable arrow_u = ContextCompat.getDrawable(getActivity(), R.drawable.robot_u);
+                            mmArena.getChildAt(id).setBackground(arrow_u);
+                            break;
+                        //d
+                        case 'd':
+                            Drawable arrow_d = ContextCompat.getDrawable(getActivity(), R.drawable.robot_d);
+                            mmArena.getChildAt(id).setBackground(arrow_d);
+                            break;
+                        //l
+                        case 'l':
+                            Drawable arrow_l = ContextCompat.getDrawable(getActivity(), R.drawable.robot_l);
+                            mmArena.getChildAt(id).setBackground(arrow_l);
+                            break;
+                        //r
+                        case 'r':
+                            Drawable arrow_r = ContextCompat.getDrawable(getActivity(), R.drawable.robot_r);
+                            mmArena.getChildAt(id).setBackground(arrow_r);
+                            break;
+                    }
+
+                    int[] surrounding_list = new int[8];
+                    surrounding_list[0] = id - 17;
+                    surrounding_list[1] = id - 16;
+                    surrounding_list[2] = id - 15;
+                    surrounding_list[3] = id - 1;
+                    surrounding_list[4] = id + 1;
+                    surrounding_list[5] = id + 15;
+                    surrounding_list[6] = id + 16;
+                    surrounding_list[7] = id + 17;
+
+                    for (int i = 0; i < surrounding_list.length; i++) {
+                        if (surrounding_list[i] % 16 <= 0 || surrounding_list[i] >= 320) {
+                        } else {
+                            GradientDrawable border_background = new GradientDrawable();
+                            border_background.setColor(Color.parseColor(bbgColour));
+                            border_background.setStroke(1, Color.parseColor("#000000"));
+                            mmArena.getChildAt(surrounding_list[i]).setBackground(border_background);
+                        }
+                    }
+                    break;
                 }
             }
         }

@@ -3,6 +3,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -10,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 
@@ -299,7 +303,7 @@ public class BluetoothConnectionService {
             mmOutStream = tmpOut;
         }
 
-        public void run(){
+        public void run() {
             byte[] buffer = new byte[1024];  // buffer store for the stream
 
             int bytes; // bytes returned from read()
@@ -313,11 +317,12 @@ public class BluetoothConnectionService {
                     Log.d(TAG, "InputStream: " + incomingMessage);
                     mHandler.obtainMessage(MESSAGE_READ, bytes, -1, incomingMessage).sendToTarget();
                 } catch (IOException e) {
-                    Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage() );
+                    Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
                     break;
                 }
             }
         }
+        
 
         //Call this from the main activity to send data to the remote device
         void write(byte[] bytes) {

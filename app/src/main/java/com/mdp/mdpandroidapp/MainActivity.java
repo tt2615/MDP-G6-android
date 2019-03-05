@@ -1,3 +1,5 @@
+// todo RP im alive every 5 seconds background thread
+
 package com.mdp.mdpandroidapp;
 
 import android.bluetooth.BluetoothAdapter;
@@ -11,6 +13,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
+import com.mdp.mdpandroidapp.BluetoothConnectionService;
+import com.mdp.mdpandroidapp.ConfigureFragment;
+import com.mdp.mdpandroidapp.ConnectFragment;
+import com.mdp.mdpandroidapp.ControlFragment;
+import com.mdp.mdpandroidapp.ExploreFragment;
+import com.mdp.mdpandroidapp.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

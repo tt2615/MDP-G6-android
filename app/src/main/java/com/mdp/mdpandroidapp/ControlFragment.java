@@ -1,6 +1,3 @@
-//todo filter connect mac addresses
-//todo remove b' ' from incoming rpi message
-
 package com.mdp.mdpandroidapp;
 
 import android.os.Bundle;

@@ -346,16 +346,12 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
             if (action.equals(BluetoothDevice.ACTION_FOUND)){
                 BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
                 Log.d("jaydenchua", device.getAddress());
-                if (device.toString().equals("C8:21:58:8F:02:8B") || device.toString().equals("B8:27:EB:3A:91:84")){
+                if (device.toString().equals("B8:27:EB:3A:91:84") || device.toString().equals("C8:21:58:8F:02:8B") || device.toString().equals("48:2C:A0:38:7B:EE")){ // pi,jay,brandon
                     mBTDevices.add(device);
                 }
                 Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
                 mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
                 lvNewDevices.setAdapter(mDeviceListAdapter);
-            }
-
-            for (int i = 0; i < mBTDevices.size(); i++){
-                Log.d("jaydenchua", mBTDevices.get(i).toString());
             }
         }
     };
