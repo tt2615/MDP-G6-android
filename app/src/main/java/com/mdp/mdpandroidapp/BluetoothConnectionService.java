@@ -322,7 +322,7 @@ public class BluetoothConnectionService {
                 }
             }
         }
-        
+
 
         //Call this from the main activity to send data to the remote device
         void write(byte[] bytes) {
