@@ -1,5 +1,6 @@
 // todo deal with null mapdesc strings
 // todo flow of algo -> explore to fastpath
+// todo AD 1,0,0
 
 package com.mdp.mdpandroidapp;
 
@@ -51,6 +52,7 @@ public class ExploreFragment extends Fragment {
     private Button update_button;
     private Button cancel_button;
     private TextView algo_mode;
+    private Button calibrate_button;
 
     private boolean manual_display_mode = false;
     private Integer positionId;
@@ -156,7 +158,7 @@ public class ExploreFragment extends Fragment {
                                                 "Exploration finished!",
                                                 Toast.LENGTH_SHORT);
                                         toast.show();
-
+                                        mDeviceMessagesListAdapter.add("Exploration finished!");
                                         set_parse_mode(ParsingModeCal);
                                         break;
                                 }
@@ -169,7 +171,7 @@ public class ExploreFragment extends Fragment {
                                                 "Calibration finished!",
                                                 Toast.LENGTH_SHORT);
                                         toast.show();
-
+                                        mDeviceMessagesListAdapter.add("Calibration finished!");
                                         fastpath_button.setEnabled(true);
                                         break;
                                 }
@@ -310,9 +312,7 @@ public class ExploreFragment extends Fragment {
                     mArena.setColor(id,"#000000","single","");
                 }
                 descriptor2Ptr++;
-                Log.d("descriptor2Ptr", ((Integer)descriptor2Ptr).toString());
             }
-            Log.d("mapdesclength2", ((Integer)mapDescriptor2Bin.length()).toString());
         }
 
         mArena.showArrows();
@@ -351,6 +351,7 @@ public class ExploreFragment extends Fragment {
         update_button = exploreView.findViewById(R.id.update_button);
         cancel_button = exploreView.findViewById(R.id.cancel_button);
         algo_mode = exploreView.findViewById(R.id.algo_mode);
+        calibrate_button = exploreView.findViewById(R.id.calibrate_button);
 
         mDeviceMessages = (ListView) exploreView.findViewById(R.id.MsgReceived);
         mDeviceMessagesListAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
@@ -366,8 +367,6 @@ public class ExploreFragment extends Fragment {
         sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
         startPointId = sp_sp.getInt("sp_sp", 0);
         positionId = startPointId;
-        String sp_msg = "StartPoint Coordinates: " + getCol(startPointId) + "," + getRow(startPointId);
-        mBluetoothConnectionService.write(sp_msg.getBytes());
         sp_str = "(" + getCol(startPointId).toString() + ", " +  getRow(startPointId).toString() + ")";
         startpoint_coord.setText(sp_str);
 
@@ -383,7 +382,7 @@ public class ExploreFragment extends Fragment {
                     toast.show();
                 }
 
-                String way_point_message = "AL wp " + getCol(wayPointId).toString() + " " +  getRow(wayPointId).toString();
+                String way_point_message = "AL wp[" + getCol(wayPointId).toString() + "," +  getRow(wayPointId).toString() + "]";
                 mBluetoothConnectionService.write(way_point_message.getBytes());
 
                 sleep(1000);
@@ -415,6 +414,7 @@ public class ExploreFragment extends Fragment {
             public void onClick(View view) {
                 // auto update arduino position on gridlayout
                 auto_button.setEnabled(false);
+                manual_button.setEnabled(true);
                 update_button.setEnabled(false);
 
                 String[] modeMsg = algo_mode.getText().toString().split("\n\n");
@@ -498,6 +498,14 @@ public class ExploreFragment extends Fragment {
                 if (startPointId > 0 && startPointId <= 320) {
                     mArena.setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
                 }
+            }
+        });
+
+        calibrate_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String calibrate_message = "AD 1,0,0";
+                mBluetoothConnectionService.write(calibrate_message.getBytes());
             }
         });
 
@@ -678,9 +686,6 @@ public class ExploreFragment extends Fragment {
             SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
             edit_sp_sp.putInt("sp_sp", startPointId);
             edit_sp_sp.commit();
-
-            String sp_msg = "StartPoint Coordinates: " + (getCol(startPointId)-1) + "," + (getRow(startPointId)-1);
-            mBluetoothConnectionService.write(sp_msg.getBytes());
         }
 
         private void showArduinoPosition() {
