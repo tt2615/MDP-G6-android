@@ -89,7 +89,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Stationary"
+                android:text="Idle"
                 android:layout_below="@id/cancel_button"/>
 
         </RelativeLayout>
@@ -150,6 +150,7 @@
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
+            android:layout_alignParentLeft="true"
             android:padding="10dp">
 
             <TextView
@@ -205,12 +206,35 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/startpoint_display"/>
 
+            <View
+                android:id="@+id/invisview3"
+                android:layout_width="20dp"
+                android:layout_height="0dp"
+                android:visibility="invisible"
+                android:layout_toRightOf="@id/startpoint_coord"/>
+
+            <TextView
+                android:id="@+id/separator2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="|"
+                android:layout_toRightOf="@id/invisview3"/>
+
+            <View
+                android:id="@+id/invisview4"
+                android:layout_width="20dp"
+                android:layout_height="0dp"
+                android:visibility="invisible"
+                android:layout_toRightOf="@id/separator2"/>
+
+
             <TextView
                 android:id="@+id/button_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="None"
-                android:layout_toRightOf="@id/startpoint_coord"/>
+                android:layout_toRightOf="@id/invisview4"/>
 
         </RelativeLayout>
 
