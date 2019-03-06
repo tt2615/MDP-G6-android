@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -254,14 +253,9 @@ public class ExploreFragment extends Fragment {
 
                 String way_point_message = "AL " + getCol(wayPointId).toString() + ", " +  getRow(wayPointId).toString() +"]"; //todo protocol
                 mBluetoothConnectionService.write(way_point_message.getBytes());
-                try
-                {
-                    Thread.sleep(1000);
-                }
-                catch(InterruptedException ex)
-                {
-                    Thread.currentThread().interrupt();
-                }
+
+                sleep(1000);
+
                 String start_message = "AL fp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
             }
@@ -424,6 +418,17 @@ public class ExploreFragment extends Fragment {
             case ModeStartPoint:
                 button_status.setText("Select StartPoint");
                 break;
+        }
+    }
+
+    public void sleep (int millisecond){
+        try
+        {
+            Thread.sleep(millisecond);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
         }
     }
 
