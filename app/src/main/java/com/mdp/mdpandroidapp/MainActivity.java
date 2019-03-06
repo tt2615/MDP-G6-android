@@ -1,5 +1,3 @@
-// todo RP im alive every 5 seconds background thread
-
 package com.mdp.mdpandroidapp;
 
 import android.bluetooth.BluetoothAdapter;

@@ -22,6 +22,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.os.Handler;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 
 public class ConnectFragment extends Fragment implements AdapterView.OnItemClickListener{
@@ -417,7 +419,16 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
                         //  Reading message from remote device
                         String receivedMessage = message.obj.toString();
                         mDeviceMessagesListAdapter.add(receivedMessage);
-                        return false;
+                        break;
+                    case BluetoothConnectionService.MESSAGE_TOAST:
+                        String deviceName = message.obj.toString();
+                        Toast toast = Toast.makeText(getContext(),
+                                "Device Connected: "+deviceName,
+                                Toast.LENGTH_SHORT);
+                        toast.show();
+
+                    return false;
+
                 }
             }catch (Throwable t) {
                 Log.e(TAG,null, t);

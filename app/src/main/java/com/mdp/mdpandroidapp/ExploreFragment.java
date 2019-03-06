@@ -1,6 +1,5 @@
 // todo deal with null mapdesc strings
 // todo flow of algo -> explore to fastpath
-// todo json for amdtool (send and receive MDS)
 
 package com.mdp.mdpandroidapp;
 
@@ -102,7 +101,7 @@ public class ExploreFragment extends Fragment {
                     case BluetoothConnectionService.MESSAGE_READ:
                         //  Reading message from remote device
                         String receivedMessage = message.obj.toString();
-                        String msg1 = receivedMessage.substring(2, receivedMessage.length() - 2);
+                        String msg1 = receivedMessage.substring(2, receivedMessage.length() - 1);
                         //b'x'
                         Log.d("msg1", msg1);
                         String[] msg = msg1.split(";");
@@ -110,9 +109,14 @@ public class ExploreFragment extends Fragment {
                         arduinoDir = msg[1].charAt(0);
                         mapDescriptor1 = msg[2];
                         mapDescriptor2 = msg[3];
+                        Log.d("mapdesc2handler", mapDescriptor2);
                         switch (arduinoPosition[0]){
                             case "po":
-                                if(mapDescriptor1==null){break;}
+                                if(mapDescriptor1==null){
+                                    // get wp coordinate if any, enable fp button, disable other buttons
+
+                                    break;
+                                }
                                 int po_x = Integer.parseInt(arduinoPosition[1]);
                                 int po_y = Integer.parseInt(arduinoPosition[2]);
                                 positionId = corToId(po_x,po_y);
@@ -156,22 +160,16 @@ public class ExploreFragment extends Fragment {
         BigInteger bi1 = new BigInteger(mapDescriptor1, 16);
         String mapDescriptor1Bin = bi1.toString(2);
         Log.d("mapdesc1", mapDescriptor1Bin);
-
         String mapDescriptor2Bin = "";
-        if (mapDescriptor2.charAt(0) == '0'){
-            mapDescriptor2 = '1' + mapDescriptor2;
-            BigInteger bi2 = new BigInteger(mapDescriptor2, 16);
-            String mapDescriptor2BinTMP = bi2.toString(2);
-            mapDescriptor2Bin = mapDescriptor2BinTMP.substring(1);
-        }
-        else {
-            BigInteger bi2 = new BigInteger(mapDescriptor2, 16);
-            mapDescriptor2Bin = bi2.toString(2);
-        }
+
+        Log.d("mapdesc2", mapDescriptor2);
+        String MDS2length = "%" + mapDescriptor2.length()*4 + "s";
+        BigInteger bi2 = new BigInteger(mapDescriptor2, 16);
+        mapDescriptor2Bin = bi2.toString(2);
+        mapDescriptor2Bin = String.format(MDS2length, mapDescriptor2Bin).replace(" ", "0");
 
         int descriptor2Ptr = 0;
         for (int i=2;i<302;i++){
-            Log.d("mapdesc", ((Integer)i).toString());
             int id = posToId(i);
             if(mapDescriptor1Bin.charAt(i)=='0'){
                 mArena.setColor(id,"#CCCCCC","single","");
@@ -240,24 +238,30 @@ public class ExploreFragment extends Fragment {
         sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
         startPointId = sp_sp.getInt("sp_sp", 0);
         positionId = startPointId;
-        String sp_msg = "StartPoint Coordinates: " + getCol(startPointId) + "," + getRow(startPointId);
-        mBluetoothConnectionService.write(sp_msg.getBytes());
+//        String sp_msg = "StartPoint Coordinates: " + getCol(startPointId) + "," + getRow(startPointId);
+//        mBluetoothConnectionService.write(sp_msg.getBytes());
         sp_str = "(" + getCol(startPointId).toString() + ", " +  getRow(startPointId).toString() + ")";
         startpoint_coord.setText(sp_str);
 
         fastpath_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) { // todo reorder
                 // execute fastest path algo
                 fastpath_button.setEnabled(false);
                 explore_button.setEnabled(false);
                 cancel_button.setEnabled(true);
                 algo_mode.setText("Fastest Path");
 
-                String start_point_message = "sp[" + getCol(startPointId).toString() + ", " +  getRow(startPointId).toString() + "]";
-                mBluetoothConnectionService.write(start_point_message.getBytes());
-                String way_point_message = "wp[" + getCol(wayPointId).toString() + ", " +  getRow(wayPointId).toString() +"]";
+                String way_point_message = "AL " + getCol(wayPointId).toString() + ", " +  getRow(wayPointId).toString() +"]"; //todo protocol
                 mBluetoothConnectionService.write(way_point_message.getBytes());
+                try
+                {
+                    Thread.sleep(1000);
+                }
+                catch(InterruptedException ex)
+                {
+                    Thread.currentThread().interrupt();
+                }
                 String start_message = "AL fp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
             }
@@ -275,10 +279,9 @@ public class ExploreFragment extends Fragment {
                 algo_mode.setText("Explore\n\nAuto");
 
                 String start_point_message = "AL sp[" + getCol(startPointId).toString() + "," +  getRow(startPointId).toString() + "," + start_direction + "]";
-                mBluetoothConnectionService.write(start_point_message.getBytes());
+                mBluetoothConnectionService.write(start_point_message.getBytes()); // todo add delay 1s
                 String start_message = "AL exp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
-
             }
         });
 
@@ -501,7 +504,7 @@ public class ExploreFragment extends Fragment {
                                         setStartPoint(gridId);
                                         break;
                                 }
-                                if (startPointId != 0) { //todo change condition
+                                if (startPointId != 0) {
                                     explore_button.setEnabled(true);
                                 } else {
                                     explore_button.setEnabled(false);
@@ -541,8 +544,8 @@ public class ExploreFragment extends Fragment {
             edit_wp_sp.putInt("wp_sp", wayPointId);
             edit_wp_sp.commit();
 
-            String wp_msg = "WayPoint Coordinates: " + (getCol(wayPointId)-1) + "," + (getRow(wayPointId)-1);
-            mBluetoothConnectionService.write(wp_msg.getBytes());
+//            String wp_msg = "WayPoint Coordinates: " + (getCol(wayPointId)-1) + "," + (getRow(wayPointId)-1);
+//            mBluetoothConnectionService.write(wp_msg.getBytes());
         }
 
         private void removeStartPoint(int id) {
@@ -570,8 +573,8 @@ public class ExploreFragment extends Fragment {
             edit_sp_sp.putInt("sp_sp", startPointId);
             edit_sp_sp.commit();
 
-            String sp_msg = "StartPoint Coordinates: " + (getCol(startPointId)-1) + "," + (getRow(startPointId)-1);
-            mBluetoothConnectionService.write(sp_msg.getBytes());
+//            String sp_msg = "StartPoint Coordinates: " + (getCol(startPointId)-1) + "," + (getRow(startPointId)-1);
+//            mBluetoothConnectionService.write(sp_msg.getBytes());
         }
 
         private void showArduinoPosition(char dir) {
@@ -583,9 +586,6 @@ public class ExploreFragment extends Fragment {
             setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
             setColor(positionId, "#7EC0EE", "robot", "#7EC0EE");
             setColor(wayPointId, "#FF0000", "single", "");
-
-            //todo: show direction of the arduino
-            //todo remove wp in exp
         }
 
         public void showArrows() {
@@ -662,7 +662,7 @@ public class ExploreFragment extends Fragment {
                     break;
                 }
 
-                case ("robot"): { //todo robot color
+                case ("robot"): {
                     GradientDrawable background = new GradientDrawable();
                     if (id%16 == 0 || id >= 320){
                         background.setStroke(1,Color.parseColor("#FFFFFF"));

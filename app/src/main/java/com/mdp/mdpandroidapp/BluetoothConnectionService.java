@@ -38,7 +38,7 @@ public class BluetoothConnectionService {
 
     private Handler mHandler;
     static final int MESSAGE_READ = 0;
-    static final int MESSAGE_WRITE = 1;
+    static final int MESSAGE_TOAST = 1;
 
 
     private BluetoothConnectionService() {
@@ -249,6 +249,7 @@ public class BluetoothConnectionService {
                 // This is a blocking call and will only return on a successful connection or an exception
                 mmSocket.connect();
                 Log.d(TAG, "run: ConnectThread connected.");
+                mHandler.obtainMessage(MESSAGE_TOAST,-1,-1,mmDevice.getName()).sendToTarget();
                 manageMyConnectedSocket(mmSocket);
             } catch (IOException e1) {
                 // Unable to connect; close the socket and return.
@@ -341,7 +342,6 @@ public class BluetoothConnectionService {
             try {
                 mmOutStream.write(bytes);
                 mmOutStream.flush();
-                mHandler.obtainMessage(MESSAGE_WRITE, bytes.length, -1, bytes).sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage() );
             }
