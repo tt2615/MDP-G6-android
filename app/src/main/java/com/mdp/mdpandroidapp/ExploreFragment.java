@@ -1,9 +1,5 @@
-// todo deal with null mapdesc strings
-// todo flow of algo -> explore to fastpath
-// todo AD 1,0,0
-
 package com.mdp.mdpandroidapp;
-
+//todo "AL wp "
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -52,6 +48,8 @@ public class ExploreFragment extends Fragment {
     private Button update_button;
     private Button cancel_button;
     private TextView algo_mode;
+    private Button sendwp_button;
+    private Button sendemptywp_button;
     private Button calibrate_button;
 
     private boolean manual_display_mode = false;
@@ -160,6 +158,8 @@ public class ExploreFragment extends Fragment {
                                         toast.show();
                                         mDeviceMessagesListAdapter.add("Exploration finished!");
                                         set_parse_mode(ParsingModeCal);
+                                        updateArena();
+                                        updatePosition();
                                         break;
                                 }
                                 break;
@@ -351,6 +351,8 @@ public class ExploreFragment extends Fragment {
         update_button = exploreView.findViewById(R.id.update_button);
         cancel_button = exploreView.findViewById(R.id.cancel_button);
         algo_mode = exploreView.findViewById(R.id.algo_mode);
+        sendemptywp_button = exploreView.findViewById(R.id.sendemptywp_button);
+        sendwp_button = exploreView.findViewById(R.id.sendwp_button);
         calibrate_button = exploreView.findViewById(R.id.calibrate_button);
 
         mDeviceMessages = (ListView) exploreView.findViewById(R.id.MsgReceived);
@@ -372,20 +374,9 @@ public class ExploreFragment extends Fragment {
 
         fastpath_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { // todo reorder
+            public void onClick(View view) { //
                 // execute fastest path algo
-
-                if(wayPointId == 0) {
-                    Toast toast = Toast.makeText(getContext(),
-                            "Please setup waypoint!",
-                            Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-
-                String way_point_message = "AL wp[" + getCol(wayPointId).toString() + "," +  getRow(wayPointId).toString() + "]";
-                mBluetoothConnectionService.write(way_point_message.getBytes());
-
-                sleep(1000);
+//                sleep(1000);
 
                 String start_message = "AL fp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
@@ -402,7 +393,7 @@ public class ExploreFragment extends Fragment {
                 String start_point_message = "AL sp[" + getCol(startPointId).toString() + "," +  getRow(startPointId).toString() + "," + start_direction + "]";
                 mBluetoothConnectionService.write(start_point_message.getBytes());
 
-                sleep(1000);
+                sleep(2000);
 
                 String start_message = "AL exp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
@@ -497,6 +488,32 @@ public class ExploreFragment extends Fragment {
 
                 if (startPointId > 0 && startPointId <= 320) {
                     mArena.setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
+                }
+            }
+        });
+
+        sendemptywp_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wayPointId = 0;
+                mArena.setWayPoint(wayPointId);
+                String send_wp_message = "AL wp ";
+                mBluetoothConnectionService.write(send_wp_message.getBytes());
+            }
+        });
+
+        sendwp_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(wayPointId == 0) {
+                    Toast toast = Toast.makeText(getContext(),
+                            "Please pick a waypoint!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else {
+                    String send_wp_message = "AL wp[" + getCol(wayPointId).toString() + "," +  getRow(wayPointId).toString() + "]";
+                    mBluetoothConnectionService.write(send_wp_message.getBytes());
                 }
             }
         });
@@ -621,7 +638,7 @@ public class ExploreFragment extends Fragment {
                                         setStartPoint(gridId);
                                         break;
                                 }
-                                if (startPointId != 0) {
+                                if (startPointId != 0 && parsingMode == ParsingModeIdle) {
                                     explore_button.setEnabled(true);
                                 } else {
                                     explore_button.setEnabled(false);
@@ -651,7 +668,8 @@ public class ExploreFragment extends Fragment {
 
         private void setWayPoint(Integer id) {
             wayPointId = id;
-            setColor(wayPointId, "#FF0000", "single", "");
+            updateArena();
+            updatePosition();
 
             wp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             waypoint_coord.setText(wp_str);

@@ -38,11 +38,27 @@
             android:layout_above="@id/MsgReceivedLayout">
 
             <Button
+                android:id="@+id/sendemptywp_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="empty WP"
+                android:padding="10dp"/>
+
+            <Button
+                android:id="@+id/sendwp_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send WP"
+                android:padding="10dp"
+                android:layout_below="@id/sendemptywp_button"/>
+
+            <Button
                 android:id="@+id/calibrate_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Calibrate"
-                android:padding="10dp"/>
+                android:padding="10dp"
+                android:layout_below="@id/sendwp_button"/>
 
         </RelativeLayout>
 

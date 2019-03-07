@@ -125,7 +125,7 @@ public class ControlFragment extends Fragment implements SensorEventListener {
                         String receivedMessagetmp = message.obj.toString();
                         String receivedMessage = receivedMessagetmp.substring(2, receivedMessagetmp.length() - 1);
                         switch (receivedMessage){
-                            case "rl": // todo checklist #4 robot status
+                            case "rl":
                                 mArduinoState.setText("rotating left");
                                 break;
                             case "rr":

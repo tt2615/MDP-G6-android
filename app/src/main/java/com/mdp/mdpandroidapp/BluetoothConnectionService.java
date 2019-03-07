@@ -127,6 +127,10 @@ public class BluetoothConnectionService {
         mHandler = new Handler(callback);
     }
 
+    public boolean isConnected() {
+        return mConnectedThread!=null;
+    }
+
     /**
      * This thread runs while listening for incoming connections. It behaves
      * like a server-side client. It runs until a connection is accepted
@@ -215,6 +219,7 @@ public class BluetoothConnectionService {
 
             BluetoothSocket tmp = null;
             Log.i(TAG, "RUN mConnectThread ");
+
 
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice

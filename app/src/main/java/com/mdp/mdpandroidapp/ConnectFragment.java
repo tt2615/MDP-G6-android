@@ -38,7 +38,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
     private BluetoothConnectionService mBluetoothConnectionService;
 
     private ListView lvNewDevices;
-    private Button btnEnable_DisableBT, btnEnableDisable_Discoverable, btnDiscover, btnSend;
+    private Button btnEnable_DisableBT, btnEnableDisable_Discoverable, btnDiscover, btnSend, pi_button;
     private EditText msgToSend;
 
     public BluetoothDevice mBTDevice;
@@ -71,6 +71,7 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         btnEnableDisable_Discoverable = (Button) rootView.findViewById(R.id.btnDiscoverable_on_off);
         btnDiscover = (Button) rootView.findViewById(R.id.btnFindUnpairedDevices);
         btnSend = (Button) rootView.findViewById(R.id.SendMsg);
+        pi_button = rootView.findViewById(R.id.pi_button);
         msgToSend = (EditText) rootView.findViewById(R.id.MsgToBeSent);
         lvNewDevices = (ListView) rootView.findViewById(R.id.lvNewDevices);
         mDeviceMessages = (ListView) rootView.findViewById(R.id.MsgReceived);
@@ -135,6 +136,17 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
                 if (message.length != 0) {
                     msgToSend.setText("");
                     mBluetoothConnectionService.write(message);
+                }
+            }
+        });
+
+        pi_button.setOnClickListener(new View.OnClickListener() { //B8:27:EB:3A:91:84
+            @Override
+            public void onClick(View view) {
+                mBluetoothAdapter.cancelDiscovery();
+                if(!mBluetoothConnectionService.isConnected()) {
+                    mBTDevice = mBluetoothAdapter.getRemoteDevice("B8:27:EB:3A:91:84");
+                    mBluetoothConnectionService.startClient(mBTDevice, true);
                 }
             }
         });
