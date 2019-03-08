@@ -143,10 +143,21 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         pi_button.setOnClickListener(new View.OnClickListener() { //B8:27:EB:3A:91:84
             @Override
             public void onClick(View view) {
+
+                if(!mBluetoothAdapter.isEnabled()){
+                    Toast toast = Toast.makeText(getActivity(), "Bluetooth not connected", Toast.LENGTH_SHORT);
+                    toast.show();
+                    return;
+                }
+
                 mBluetoothAdapter.cancelDiscovery();
                 if(!mBluetoothConnectionService.isConnected()) {
                     mBTDevice = mBluetoothAdapter.getRemoteDevice("B8:27:EB:3A:91:84");
                     mBluetoothConnectionService.startClient(mBTDevice, true);
+                }
+                else{
+                    Toast toast = Toast.makeText(getContext(),"Already Connected",Toast.LENGTH_SHORT);
+                    toast.show();
                 }
             }
         });
@@ -377,6 +388,13 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+        if(!mBluetoothAdapter.isEnabled()){
+            Toast toast = Toast.makeText(getActivity(), "Bluetooth not connected", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
         //first cancel discovery because its very memory intensive.
         mBluetoothAdapter.cancelDiscovery();
 
@@ -396,7 +414,11 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
 
         //create connection
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-        mBluetoothConnectionService.startClient(mBTDevice,true);
+
+        if(!mBluetoothConnectionService.isConnected()) {
+            mBluetoothConnectionService = BluetoothConnectionService.getInstance();
+        }
+        mBluetoothConnectionService.startClient(mBTDevice, true);
     }
 
 
