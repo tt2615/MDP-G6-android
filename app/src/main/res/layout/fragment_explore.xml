@@ -13,11 +13,11 @@
 
         <GridLayout
             android:id="@+id/arena"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="0dp"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
@@ -25,77 +25,94 @@
             android:descendantFocusability="afterDescendants"
             android:gravity="center"
             android:horizontalSpacing="30dp"
-            android:paddingLeft="10dp"
+            android:paddingLeft="0dp"
+            android:paddingTop="5dp"
             android:rowCount="21"
             android:stackFromBottom="true"
             android:stretchMode="columnWidth"
             android:verticalSpacing="30dp"></GridLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_above="@id/MsgReceivedLayout">
-
-            <Button
-                android:id="@+id/sendemptywp_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="empty WP"
-                android:padding="10dp"/>
-
-            <Button
-                android:id="@+id/sendwp_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Send WP"
-                android:padding="10dp"
-                android:layout_below="@id/sendemptywp_button"/>
-
-            <Button
-                android:id="@+id/calibrate_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calibrate"
-                android:padding="10dp"
-                android:layout_below="@id/sendwp_button"/>
-
-        </RelativeLayout>
-
-        <RelativeLayout
             android:id="@+id/algo_buttons"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerHorizontal="true"
-            android:padding="10dp">
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/first_line"
+                android:layout_width="110dp"
+                android:layout_height="5dp"
+                android:background="#191919"
+                android:layout_centerInParent="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="15dp">
+
+            </TextView>
+
+            <Button
+                android:id="@+id/explore_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="explore"
+                android:layout_below="@id/first_line"/>
 
             <Button
                 android:id="@+id/fastpath_button"
                 android:enabled="false"
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="fastest path"/>
+                android:text="fastest path"
+                android:layout_below="@id/explore_button"/>
 
             <Button
-                android:id="@+id/explore_button"
-                android:layout_width="100dp"
+                android:id="@+id/calibrate_button"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="explore"
+                android:text="calibrate"
                 android:layout_below="@id/fastpath_button"/>
+
+            <Button
+                android:id="@+id/cancel_button"
+                android:enabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="cancel"
+                android:layout_below="@id/calibrate_button"/>
+
+            <TextView
+                android:layout_width="110dp"
+                android:layout_height="5dp"
+                android:background="#191919"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_below="@id/cancel_button">
+
+            </TextView>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/manual_auto_layout"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/algo_buttons">
 
             <Button
                 android:id="@+id/auto_button"
                 android:enabled="false"
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="auto"
-                android:layout_below="@id/explore_button"/>
+                android:text="auto"/>
 
             <Button
                 android:id="@+id/manual_button"
                 android:enabled="false"
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="manual"
                 android:layout_below="@id/auto_button"/>
@@ -103,171 +120,109 @@
             <Button
                 android:id="@+id/update_button"
                 android:enabled="false"
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="update"
                 android:layout_below="@id/manual_button"/>
 
+            <TextView
+                android:layout_width="110dp"
+                android:layout_height="5dp"
+                android:background="#191919"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_below="@id/update_button">
+
+            </TextView>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/spwp_layout"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/manual_auto_layout">
+
             <Button
-                android:id="@+id/cancel_button"
-                android:enabled="false"
-                android:layout_width="100dp"
+                android:id="@+id/startpoint_button"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="cancel"
-                android:layout_below="@id/update_button"/>
+                android:text="set start point"/>
 
             <TextView
-                android:id="@+id/algo_mode"
-                android:layout_width="100dp"
+                android:id="@+id/startpoint_coord"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Idle"
-                android:layout_below="@id/cancel_button"/>
+                android:layout_centerInParent="true"
+                android:layout_below="@id/startpoint_button"/>
+
+            <Button
+                android:id="@+id/sendsp_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="send sp"
+                android:layout_marginBottom="3dp"
+                android:layout_below="@id/startpoint_coord"/>
+
+            <Button
+                android:id="@+id/waypoint_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="set way point"
+                android:layout_below="@id/sendsp_button"/>
+
+            <TextView
+                android:id="@+id/waypoint_coord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/waypoint_button"/>
+
+            <Button
+                android:id="@+id/sendwp_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="send wp"
+                android:layout_below="@id/waypoint_coord"/>
+
+            <Button
+                android:id="@+id/reset_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="reset map"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_below="@id/sendwp_button"/>
+
+            <TextView
+                android:layout_width="110dp"
+                android:layout_height="5dp"
+                android:background="#191919"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/reset_button">
+
+            </TextView>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/MsgReceivedLayout"
             android:layout_width="wrap_content"
-            android:layout_height="70dp"
-            android:layout_above="@id/buttons"
-            android:layout_centerHorizontal="true">
+            android:layout_height="180dp"
+            android:layout_toLeftOf="@id/algo_buttons"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="10dp">
 
             <ListView
                 android:id="@+id/MsgReceived"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:transcriptMode="alwaysScroll"
-                android:stackFromBottom="true" >
+                android:stackFromBottom="true">
 
             </ListView>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/buttons"
-            android:layout_width="wrap_content"
-            android:layout_height="75dp"
-            android:layout_centerHorizontal="true"
-            android:padding="10dp"
-            android:layout_above="@id/points">
-
-            <Button
-                android:id="@+id/waypoint_button"
-                android:layout_width="130dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:text="waypoint"/>
-
-            <Button
-                android:id="@+id/startpoint_button"
-                android:layout_width="130dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:text="startpoint"
-                android:layout_toRightOf="@id/waypoint_button"/>
-
-            <Button
-                android:id="@+id/reset_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_toRightOf="@id/startpoint_button"
-                android:text="reset"/>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/points"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentLeft="true"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/waypoint_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:text="WayPoint:  "
-                android:layout_weight="1"
-                android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@id/waypoint_coord"/>
-
-            <TextView
-                android:id="@+id/waypoint_coord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-"
-                android:layout_toLeftOf="@id/invisview1"/>
-
-            <View
-                android:id="@+id/invisview1"
-                android:layout_width="20dp"
-                android:layout_height="0dp"
-                android:visibility="invisible"
-                android:layout_toLeftOf="@id/separator"/>
-
-            <TextView
-                android:id="@+id/separator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="|"/>
-
-            <View
-                android:id="@+id/invisview2"
-                android:layout_width="20dp"
-                android:layout_height="0dp"
-                android:visibility="invisible"
-                android:layout_toRightOf="@id/separator"/>
-
-            <TextView
-                android:id="@+id/startpoint_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:text="StartPoint:  "
-                android:layout_marginRight="10dp"
-                android:layout_toRightOf="@id/invisview2"/>
-
-            <TextView
-                android:id="@+id/startpoint_coord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/startpoint_display"/>
-
-            <View
-                android:id="@+id/invisview3"
-                android:layout_width="20dp"
-                android:layout_height="0dp"
-                android:visibility="invisible"
-                android:layout_toRightOf="@id/startpoint_coord"/>
-
-            <TextView
-                android:id="@+id/separator2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="|"
-                android:layout_toRightOf="@id/invisview3"/>
-
-            <View
-                android:id="@+id/invisview4"
-                android:layout_width="20dp"
-                android:layout_height="0dp"
-                android:visibility="invisible"
-                android:layout_toRightOf="@id/separator2"/>
-
-
-            <TextView
-                android:id="@+id/button_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="None"
-                android:layout_toRightOf="@id/invisview4"/>
 
         </RelativeLayout>
 

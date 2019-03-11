@@ -1,9 +1,10 @@
 package com.mdp.mdpandroidapp;
-//todo "AL wp "
+// todo sp positionid arduinodir arrowid mds1 mds2
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -47,9 +48,8 @@ public class ExploreFragment extends Fragment {
     private Button manual_button;
     private Button update_button;
     private Button cancel_button;
-    private TextView algo_mode;
+    private Button sendsp_button;
     private Button sendwp_button;
-    private Button sendemptywp_button;
     private Button calibrate_button;
 
     private boolean manual_display_mode = false;
@@ -58,13 +58,14 @@ public class ExploreFragment extends Fragment {
     private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>();
     private String mapDescriptor1;
     private String mapDescriptor2;
+    private String arrowString = "|";
     private char arduinoDir = 'u';
 
     // wp sp portion
     private Button waypoint_button;
     private Button startpoint_button;
     private Button reset_button;
-    private TextView button_status;
+//    private TextView button_status;
     int mode = 0;
     static final int ModeWayPoint = 1;
     static final int ModeStartPoint = 2;
@@ -129,10 +130,11 @@ public class ExploreFragment extends Fragment {
                                         int po_y = Integer.parseInt(arduinoPosition[2]);
                                         arduinoDir = msgList[1].charAt(0);
                                         positionId = corToId(po_x, po_y);
-                                        mDeviceMessagesListAdapter.add("android position at: " + po_x + "," + po_y +
-                                                "\ndirection:" + arduinoDir +
-                                                "\n1st descriptor: " + mapDescriptor1 +
-                                                "\n2nd descriptor: " + mapDescriptor2);
+                                        mDeviceMessagesListAdapter.add("Android Position at: " + po_x + ", " + po_y +
+                                                " || Direction: " + arduinoDir +
+                                                "\nMDF String 1: " + mapDescriptor1 +
+                                                "\nMDF String 2: " + mapDescriptor2 +
+                                                "\n" + printArrows());
                                         Log.d(TAG, "android position at: " + po_x + "," + po_y);
                                         if (manual_display_mode) {
                                             break;
@@ -157,6 +159,7 @@ public class ExploreFragment extends Fragment {
                                                 Toast.LENGTH_SHORT);
                                         toast.show();
                                         mDeviceMessagesListAdapter.add("Exploration finished!");
+                                        deactivateButton(explore_button);
                                         set_parse_mode(ParsingModeCal);
                                         updateArena();
                                         updatePosition();
@@ -186,8 +189,8 @@ public class ExploreFragment extends Fragment {
                                         int po_y = Integer.parseInt(arduinoPosition[2]);
                                         arduinoDir = msgList[1].charAt(0);
                                         positionId = corToId(po_x, po_y);
-                                        mDeviceMessagesListAdapter.add("android position at: " + po_x + "," + po_y +
-                                                "\ndirection:" + arduinoDir);
+                                        mDeviceMessagesListAdapter.add("Android Position at: " + po_x + ", " + po_y +
+                                                " || Direction: " + arduinoDir);
                                         Log.d(TAG, "android position at: " + po_x + "," + po_y);
                                         if (manual_display_mode) {
                                             break;
@@ -197,6 +200,7 @@ public class ExploreFragment extends Fragment {
                                         break;
                                     case "FPathEnd":
                                         set_parse_mode(ParsingModeIdle);
+                                        deactivateButton(fastpath_button);
                                         break;
                                 }
                                 break;
@@ -212,44 +216,48 @@ public class ExploreFragment extends Fragment {
         }
     };
 
+    private String printArrows() {
+        String arrowString = "Arrows found: ";
+        for (Integer[] i: arrowId) {
+            arrowString += "[" + getCol(i[0]) + "," + getRow(i[0]) + "," + Character.forDigit(i[1], 36) + "] ";
+            Log.d(TAG, "arrow dir: " + i[1]);
+
+        }
+        return arrowString;
+    }
+
     private void set_parse_mode(int pMode) {
         parsingMode = pMode;
         switch (parsingMode){
             case ParsingModeIdle:
-                algo_mode.setText("Idle");
-
                 explore_button.setEnabled(true);
                 startpoint_button.setEnabled(true);
+                waypoint_button.setEnabled(true);
 
                 fastpath_button.setEnabled(false);
                 update_button.setEnabled(false);
                 auto_button.setEnabled(false);
                 manual_button.setEnabled(false);
                 cancel_button.setEnabled(false);
-                waypoint_button.setEnabled(false);
                 break;
 
             case ParsingModeExplore:
-                algo_mode.setText("Explore\n\nAuto");
-
                 manual_button.setEnabled(true);
                 cancel_button.setEnabled(true);
 
                 mode = ModeIdle;
                 auto_button.setEnabled(false);
+                activateButton(auto_button);
                 fastpath_button.setEnabled(false);
                 explore_button.setEnabled(false);
                 update_button.setEnabled(false);
                 startpoint_button.setEnabled(false);
                 waypoint_button.setEnabled(false);
-                startpoint_button.setText("Startpoint");
+                set_mode(ModeIdle);
                 break;
 
 
             case ParsingModeCal:
-                algo_mode.setText("Calibration");
-
-                waypoint_button.setEnabled(true);
 
                 fastpath_button.setEnabled(false);
                 explore_button.setEnabled(false);
@@ -257,16 +265,17 @@ public class ExploreFragment extends Fragment {
                 manual_button.setEnabled(false);
                 update_button.setEnabled(false);
                 cancel_button.setEnabled(false);
+                startpoint_button.setEnabled(false);
+                waypoint_button.setEnabled(false);
                 break;
 
             case ParsingModeFPath:
-                algo_mode.setText("Fastest Path\n\nAuto");
-
                 manual_button.setEnabled(true);
                 cancel_button.setEnabled(true);
 
                 mode = ModeIdle;
                 auto_button.setEnabled(false);
+                activateButton(auto_button);
                 fastpath_button.setEnabled(false);
                 explore_button.setEnabled(false);
                 update_button.setEnabled(false);
@@ -327,6 +336,7 @@ public class ExploreFragment extends Fragment {
         Integer[] tmp = {corToId(ar_x,ar_y), Character.getNumericValue(ar_dir)};
         Log.d(TAG, "discover arrow: " + tmp[0] +" " + tmp[1]);
         arrowId.add(tmp);
+
     }
 
     private Integer corToId(int po_x, int po_y) {
@@ -340,18 +350,18 @@ public class ExploreFragment extends Fragment {
         // Inflate the layout for this fragment
         final View exploreView = inflater.inflate(R.layout.fragment_explore, container, false);
 
-        waypoint_button = exploreView.findViewById(R.id.waypoint_button);
         startpoint_button = exploreView.findViewById(R.id.startpoint_button);
+        sendsp_button = exploreView.findViewById(R.id.sendsp_button);
+        waypoint_button = exploreView.findViewById(R.id.waypoint_button);
+        sendwp_button = exploreView.findViewById(R.id.sendwp_button);
         reset_button = exploreView.findViewById(R.id.reset_button);
-        button_status = exploreView.findViewById(R.id.button_status);
+//        button_status = exploreView.findViewById(R.id.button_status);
         fastpath_button = exploreView.findViewById(R.id.fastpath_button);
         explore_button = exploreView.findViewById(R.id.explore_button);
         auto_button = exploreView.findViewById(R.id.auto_button);
         manual_button = exploreView.findViewById(R.id.manual_button);
         update_button = exploreView.findViewById(R.id.update_button);
         cancel_button = exploreView.findViewById(R.id.cancel_button);
-        algo_mode = exploreView.findViewById(R.id.algo_mode);
-        sendemptywp_button = exploreView.findViewById(R.id.sendemptywp_button);
         sendwp_button = exploreView.findViewById(R.id.sendwp_button);
         calibrate_button = exploreView.findViewById(R.id.calibrate_button);
 
@@ -381,6 +391,7 @@ public class ExploreFragment extends Fragment {
                 String start_message = "AL fp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
                 set_parse_mode(ParsingModeFPath);
+                activateButton(fastpath_button);
             }
         });
 
@@ -390,13 +401,13 @@ public class ExploreFragment extends Fragment {
                 // execute exploration algo
                 set_parse_mode(ParsingModeExplore);
 
-                String start_point_message = "AL sp[" + getCol(startPointId).toString() + "," +  getRow(startPointId).toString() + "," + start_direction + "]";
-                mBluetoothConnectionService.write(start_point_message.getBytes());
 
                 sleep(2000);
 
                 String start_message = "AL exp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
+
+                activateButton(explore_button);
             }
         });
 
@@ -408,10 +419,9 @@ public class ExploreFragment extends Fragment {
                 manual_button.setEnabled(true);
                 update_button.setEnabled(false);
 
-                String[] modeMsg = algo_mode.getText().toString().split("\n\n");
-                algo_mode.setText(modeMsg[0]+"\n\nAuto");
-
                 manual_display_mode = false;
+                deactivateButton(manual_button);
+                activateButton(auto_button);
             }
         });
 
@@ -423,10 +433,9 @@ public class ExploreFragment extends Fragment {
                 update_button.setEnabled(true);
                 manual_button.setEnabled(false);
 
-                String[] modeMsg = algo_mode.getText().toString().split("\n\n");
-                algo_mode.setText(modeMsg[0]+"\n\nManual");
-
                 manual_display_mode = true;
+                deactivateButton(auto_button);
+                activateButton(manual_button);
             }
         });
 
@@ -444,21 +453,10 @@ public class ExploreFragment extends Fragment {
             public void onClick(View view) {
                 // end current algorithm
                 set_parse_mode(ParsingModeIdle);
-            }
-        });
-
-        waypoint_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mode!=ModeWayPoint) {
-                    set_mode(ModeWayPoint);
-                    waypoint_button.setText("Back To Idle");
-                    startpoint_button.setText("StartPoint");
-                }
-                else {
-                    set_mode(ModeIdle);
-                    waypoint_button.setText("WayPoint");
-                }
+                deactivateButton(explore_button);
+                deactivateButton(fastpath_button);
+                deactivateButton(auto_button);
+                deactivateButton(manual_button);
             }
         });
 
@@ -468,37 +466,49 @@ public class ExploreFragment extends Fragment {
                 if (mode!=ModeStartPoint) {
                     set_mode(ModeStartPoint);
                     startpoint_button.setText("Back To Idle");
-                    waypoint_button.setText("WayPoint");
+                    activateButton(startpoint_button);
+                    waypoint_button.setText("set way point");
+                    deactivateButton(waypoint_button);
                 }
                 else {
                     set_mode(ModeIdle);
-                    startpoint_button.setText("StartPoint");
+                    startpoint_button.setText("set start point");
+                    deactivateButton(startpoint_button);
                 }
             }
         });
 
-        reset_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                for (int row=0; row < 20; row++){
-                    for (int col = 1; col <16; col++){
-                        mArena.setColor(row*16+col,"#CCCCCC","single","");
-                    }
-                }
-
-                if (startPointId > 0 && startPointId <= 320) {
-                    mArena.setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
-                }
-            }
-        });
-
-        sendemptywp_button.setOnClickListener(new View.OnClickListener() {
+        sendsp_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                wayPointId = 0;
-                mArena.setWayPoint(wayPointId);
-                String send_wp_message = "AL wp ";
-                mBluetoothConnectionService.write(send_wp_message.getBytes());
+                if(startPointId == 0) {
+                    Toast toast = Toast.makeText(getContext(),
+                            "Please pick a startpoint!",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else {
+                    String start_point_message = "AL sp[" + getCol(startPointId).toString() + "," +  getRow(startPointId).toString() + "," + start_direction + "]";
+                    mBluetoothConnectionService.write(start_point_message.getBytes());
+                }
+            }
+        });
+
+        waypoint_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mode!=ModeWayPoint) {
+                    set_mode(ModeWayPoint);
+                    waypoint_button.setText("Back To Idle");
+                    activateButton(waypoint_button);
+                    startpoint_button.setText("set start point");
+                    deactivateButton(startpoint_button);
+                }
+                else {
+                    set_mode(ModeIdle);
+                    waypoint_button.setText("set way point");
+                    deactivateButton(waypoint_button);
+                }
             }
         });
 
@@ -518,6 +528,26 @@ public class ExploreFragment extends Fragment {
             }
         });
 
+        reset_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int row=0; row < 20; row++){
+                    for (int col = 1; col <16; col++){
+                        mArena.setColor(row*16+col,"#CCCCCC","single","");
+                    }
+                }
+
+                if (startPointId > 0 && startPointId <= 320) {
+                    mArena.setColor(startPointId, "#00FF00", "bordered", "#CCFFCC");
+                }
+
+                startpoint_button.setText("set start point");
+                deactivateButton(startpoint_button);
+                waypoint_button.setText("set way point");
+                deactivateButton(waypoint_button);
+            }
+        });
+
         calibrate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -527,6 +557,14 @@ public class ExploreFragment extends Fragment {
         });
 
         return exploreView;
+    }
+
+    private void activateButton(Button button) {
+        button.getBackground().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorAccent), PorterDuff.Mode.MULTIPLY);
+    }
+
+    private void deactivateButton(Button button) {
+        button.getBackground().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorButtonNormal), PorterDuff.Mode.MULTIPLY);
     }
 
     private Integer getCol(int id) {
@@ -540,13 +578,17 @@ public class ExploreFragment extends Fragment {
         mode = choice;
         switch (choice){
             case ModeIdle:
-                button_status.setText("None");
+//                button_status.setText("None");
+                startpoint_button.setText("set start point");
+                deactivateButton(startpoint_button);
+                waypoint_button.setText("set way point");
+                deactivateButton(waypoint_button);
                 break;
             case ModeWayPoint:
-                button_status.setText("Select WayPoint");
+//                button_status.setText("Select WayPoint");
                 break;
             case ModeStartPoint:
-                button_status.setText("Select StartPoint");
+//                button_status.setText("Select StartPoint");
                 break;
         }
     }
@@ -668,8 +710,13 @@ public class ExploreFragment extends Fragment {
 
         private void setWayPoint(Integer id) {
             wayPointId = id;
-            updateArena();
-            updatePosition();
+            if (mapDescriptor1 == null){
+                setColor(wayPointId, "#FF0000", "single", "");
+            }
+            else {
+                updateArena();
+                updatePosition();
+            }
 
             wp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             waypoint_coord.setText(wp_str);
@@ -725,28 +772,8 @@ public class ExploreFragment extends Fragment {
                 background.setStroke(1, Color.parseColor("#000000"));
                 Integer cor = i[0];
                 Integer dir = i[1];
-                switch (dir){
-                    //u
-                    case 30:
-                        Drawable arrow_u = ResourcesCompat.getDrawable(getResources(), R.drawable.arrow_u, null);
-                        mmArena.getChildAt(cor).setBackground(arrow_u);
-                        break;
-                    //d
-                    case 13:
-                        Drawable arrow_d = ContextCompat.getDrawable(getActivity(), R.drawable.arrow_d);
-                        mmArena.getChildAt(cor).setBackground(arrow_d);
-                        break;
-                    //l
-                    case 21:
-                        Drawable arrow_l = ContextCompat.getDrawable(getActivity(), R.drawable.arrow_l);
-                        mmArena.getChildAt(cor).setBackground(arrow_l);
-                        break;
-                    //r
-                    case 27:
-                        Drawable arrow_r = ContextCompat.getDrawable(getActivity(), R.drawable.arrow_r);
-                        mmArena.getChildAt(cor).setBackground(arrow_r);
-                        break;
-                }
+                Drawable arrow_u = ResourcesCompat.getDrawable(getResources(), R.drawable.arrow_u, null);
+                mmArena.getChildAt(cor).setBackground(arrow_u);
             }
         }
 
