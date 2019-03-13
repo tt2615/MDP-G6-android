@@ -1,5 +1,5 @@
 package com.mdp.mdpandroidapp;
-// todo sp positionid arduinodir arrowid mds1 mds2
+
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -58,7 +58,7 @@ public class ExploreFragment extends Fragment {
     private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>();
     private String mapDescriptor1;
     private String mapDescriptor2;
-    private String arrowString = "|";
+    private String arrowString = "";
     private char arduinoDir = 'u';
 
     // wp sp portion
@@ -90,6 +90,9 @@ public class ExploreFragment extends Fragment {
     String sp_str = "-";
     SharedPreferences wp_sp;
     SharedPreferences sp_sp;
+    SharedPreferences mdf1_sp;
+    SharedPreferences mdf2_sp;
+    SharedPreferences image_sp;
     public static final String DEFAULTCOORD = "-";
     private int start_direction = 0;
 
@@ -163,6 +166,18 @@ public class ExploreFragment extends Fragment {
                                         set_parse_mode(ParsingModeCal);
                                         updateArena();
                                         updatePosition();
+
+                                        SharedPreferences.Editor edit_mdf1_sp = mdf1_sp.edit();
+                                        edit_mdf1_sp.putString("sp_mdf1", mapDescriptor1);
+                                        edit_mdf1_sp.commit();
+
+                                        SharedPreferences.Editor edit_mdf2_sp = mdf2_sp.edit();
+                                        edit_mdf2_sp.putString("sp_mdf2", mapDescriptor2);
+                                        edit_mdf2_sp.commit();
+
+                                        SharedPreferences.Editor edit_image_sp = image_sp.edit();
+                                        edit_image_sp.putString("sp_arrow", printArrows());
+                                        edit_image_sp.commit();
                                         break;
                                 }
                                 break;
@@ -370,24 +385,28 @@ public class ExploreFragment extends Fragment {
         mDeviceMessages.setAdapter(mDeviceMessagesListAdapter);
 
         waypoint_coord = exploreView.findViewById(R.id.waypoint_coord);
-        wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
-        wayPointId = wp_sp.getInt("wp_sp",1);
+        wp_sp = ((MainActivity)getActivity()).getSharedPreference(MainActivity.WP_SP);
+        wayPointId = wp_sp.getInt("sp_waypoint_id",1);
         wp_str = "(" + getCol(wayPointId).toString() + ", " +  getRow(wayPointId).toString() + ")";
         waypoint_coord.setText(wp_str);
 
         startpoint_coord = exploreView.findViewById(R.id.startpoint_coord);
-        sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
-        startPointId = sp_sp.getInt("sp_sp", 0);
-        positionId = startPointId;
+        sp_sp = ((MainActivity)getActivity()).getSharedPreference(MainActivity.SP_SP);
+        startPointId = sp_sp.getInt("sp_startpoint_id",1);
         sp_str = "(" + getCol(startPointId).toString() + ", " +  getRow(startPointId).toString() + ")";
         startpoint_coord.setText(sp_str);
+        positionId = startPointId;
+
+        mdf1_sp = ((MainActivity)getActivity()).getSharedPreference(MainActivity.MDF1);
+        mapDescriptor1 = mdf1_sp.getString("sp_mdf1","N/A");
+        mdf2_sp = ((MainActivity)getActivity()).getSharedPreference(MainActivity.MDF2);
+        mapDescriptor2 = mdf2_sp.getString("sp_mdf2","N/A");
+        image_sp = ((MainActivity)getActivity()).getSharedPreference(MainActivity.ARROW);
+        arrowString = image_sp.getString("sp_arrow","N/A");
 
         fastpath_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { //
-                // execute fastest path algo
-//                sleep(1000);
-
+            public void onClick(View view) {
                 String start_message = "AL fp_start";
                 mBluetoothConnectionService.write(start_message.getBytes());
                 set_parse_mode(ParsingModeFPath);
@@ -398,9 +417,7 @@ public class ExploreFragment extends Fragment {
         explore_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // execute exploration algo
                 set_parse_mode(ParsingModeExplore);
-
 
                 sleep(2000);
 
@@ -702,9 +719,9 @@ public class ExploreFragment extends Fragment {
             wp_str = "-";
             waypoint_coord.setText("-");
 
-            wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
+//            wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
             SharedPreferences.Editor edit_wp_sp = wp_sp.edit();
-            edit_wp_sp.putInt("wp_sp", 1);
+            edit_wp_sp.putInt("sp_waypoint_id", 1);
             edit_wp_sp.commit();
         }
 
@@ -721,9 +738,9 @@ public class ExploreFragment extends Fragment {
             wp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             waypoint_coord.setText(wp_str);
 
-            wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
+//            wp_sp = getActivity().getSharedPreferences("wp_sp", Context.MODE_PRIVATE);
             SharedPreferences.Editor edit_wp_sp = wp_sp.edit();
-            edit_wp_sp.putInt("wp_sp", wayPointId);
+            edit_wp_sp.putInt("sp_waypoint_id", wayPointId);
             edit_wp_sp.commit();
         }
 
@@ -734,9 +751,8 @@ public class ExploreFragment extends Fragment {
             sp_str = "-";
             startpoint_coord.setText("-");
 
-            sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
             SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
-            edit_sp_sp.putInt("sp_sp", 290);
+            edit_sp_sp.putInt("sp_startpoint_id", 290);
             edit_sp_sp.commit();
         }
 
@@ -747,9 +763,8 @@ public class ExploreFragment extends Fragment {
             sp_str = "(" + (getCol(id) - 1) + ", " + (getRow(id) - 1) + ")";
             startpoint_coord.setText(sp_str);
 
-            sp_sp = getActivity().getSharedPreferences("sp_sp", Context.MODE_PRIVATE);
             SharedPreferences.Editor edit_sp_sp = sp_sp.edit();
-            edit_sp_sp.putInt("sp_sp", startPointId);
+            edit_sp_sp.putInt("sp_startpoint_id", startPointId);
             edit_sp_sp.commit();
         }
 
