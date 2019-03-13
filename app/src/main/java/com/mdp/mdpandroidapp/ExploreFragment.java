@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,7 +56,7 @@ public class ExploreFragment extends Fragment {
     private boolean manual_display_mode = false;
     private Integer positionId;
     private Integer oldPositionId;
-    private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>();
+    private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>(Arrays.asList(new Integer[5][]));
     private String mapDescriptor1;
     private String mapDescriptor2;
     private String arrowString = "";
@@ -148,10 +149,11 @@ public class ExploreFragment extends Fragment {
                                     case "ar":
                                         int ar_x = Integer.parseInt(arduinoPosition[1]);
                                         int ar_y = Integer.parseInt(arduinoPosition[2]);
+                                        int ar_id = Integer.parseInt(arduinoPosition[3]);
                                         char arrowDir = msgList[1].charAt(0);
                                         Log.d(TAG, "discovered arrow: " + ar_x + "," + ar_y +
                                                 "\ndirection: " + arrowDir);
-                                        discoverArrow(ar_x,ar_y,arrowDir);
+                                        discoverArrow(ar_x,ar_y,arrowDir,ar_id);
                                         updateArena();
                                         updatePosition();
                                         mDeviceMessagesListAdapter.add("discovered arrow: " + ar_x + "," + ar_y + "," + arrowDir);
@@ -234,9 +236,10 @@ public class ExploreFragment extends Fragment {
     private String printArrows() {
         String arrowString = "Arrows found: ";
         for (Integer[] i: arrowId) {
-            arrowString += "[" + getCol(i[0]) + "," + getRow(i[0]) + "," + Character.forDigit(i[1], 36) + "] ";
-            Log.d(TAG, "arrow dir: " + i[1]);
-
+            if(i!=null) {
+                arrowString += "[" + getCol(i[0]) + "," + getRow(i[0]) + "," + Character.forDigit(i[1], 36) + "] ";
+                Log.d(TAG, "arrow dir: " + i[1]);
+            }
         }
         return arrowString;
     }
@@ -347,11 +350,10 @@ public class ExploreFragment extends Fragment {
         return (19-i/15)*16+(i%15)+1;
     }
 
-    private void discoverArrow(int ar_x, int ar_y, char ar_dir) {
+    private void discoverArrow(int ar_x, int ar_y, char ar_dir, int ar_id) {
         Integer[] tmp = {corToId(ar_x,ar_y), Character.getNumericValue(ar_dir)};
         Log.d(TAG, "discover arrow: " + tmp[0] +" " + tmp[1]);
-        arrowId.add(tmp);
-
+        arrowId.set(ar_id, tmp);
     }
 
     private Integer corToId(int po_x, int po_y) {
@@ -379,6 +381,8 @@ public class ExploreFragment extends Fragment {
         cancel_button = exploreView.findViewById(R.id.cancel_button);
         sendwp_button = exploreView.findViewById(R.id.sendwp_button);
         calibrate_button = exploreView.findViewById(R.id.calibrate_button);
+
+        set_parse_mode(ParsingModeIdle);
 
         mDeviceMessages = (ListView) exploreView.findViewById(R.id.MsgReceived);
         mDeviceMessagesListAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
@@ -727,7 +731,7 @@ public class ExploreFragment extends Fragment {
 
         private void setWayPoint(Integer id) {
             wayPointId = id;
-            if (mapDescriptor1 == null){
+            if (mapDescriptor1 == null || parsingMode == ParsingModeIdle){
                 setColor(wayPointId, "#FF0000", "single", "");
             }
             else {
@@ -783,12 +787,14 @@ public class ExploreFragment extends Fragment {
 
         public void showArrows() {
             for(Integer[] i: arrowId){
-                GradientDrawable background = new GradientDrawable();
-                background.setStroke(1, Color.parseColor("#000000"));
-                Integer cor = i[0];
-                Integer dir = i[1];
-                Drawable arrow_u = ResourcesCompat.getDrawable(getResources(), R.drawable.arrow_u, null);
-                mmArena.getChildAt(cor).setBackground(arrow_u);
+                if (i!=null) {
+                    GradientDrawable background = new GradientDrawable();
+                    background.setStroke(1, Color.parseColor("#000000"));
+                    Integer cor = i[0];
+                    Integer dir = i[1];
+                    Drawable arrow_u = ResourcesCompat.getDrawable(getResources(), R.drawable.arrow_u, null);
+                    mmArena.getChildAt(cor).setBackground(arrow_u);
+                }
             }
         }
 
