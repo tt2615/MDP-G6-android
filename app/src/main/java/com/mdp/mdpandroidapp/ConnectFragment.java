@@ -132,10 +132,10 @@ public class ConnectFragment extends Fragment implements AdapterView.OnItemClick
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                byte[] message = msgToSend.getText().toString().trim().getBytes();
-                if (message.length != 0) {
+                String message = msgToSend.getText().toString().trim();
+                if (message.length() != 0) {
                     msgToSend.setText("");
-                    mBluetoothConnectionService.write(message);
+                    mBluetoothConnectionService.send(message);
                 }
             }
         });

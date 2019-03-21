@@ -75,7 +75,7 @@ public class ControlFragment extends Fragment implements SensorEventListener {
             @Override
             public void onClick(View view) {
                 String message = "AD 0,0,10;";
-                mBluetoothConnectionService.write(message.getBytes());
+                mBluetoothConnectionService.send(message);
             }
         });
 
@@ -83,7 +83,7 @@ public class ControlFragment extends Fragment implements SensorEventListener {
             @Override
             public void onClick(View view) {
                 String message = "AD 0,1,10;";
-                mBluetoothConnectionService.write(message.getBytes());
+                mBluetoothConnectionService.send(message);
             }
         });
 
@@ -91,7 +91,7 @@ public class ControlFragment extends Fragment implements SensorEventListener {
             @Override
             public void onClick(View view) {
                 String message = "AD 0,3,10;";
-                mBluetoothConnectionService.write(message.getBytes());
+                mBluetoothConnectionService.send(message);
             }
         });
 
@@ -99,7 +99,7 @@ public class ControlFragment extends Fragment implements SensorEventListener {
             @Override
             public void onClick(View view) {
                 String message = "AD 0,2,10;";
-                mBluetoothConnectionService.write(message.getBytes());
+                mBluetoothConnectionService.send(message);
             }
         });
 
@@ -159,21 +159,21 @@ public class ControlFragment extends Fragment implements SensorEventListener {
             float y = sensorEvent.values[1];
             if (Math.abs(x) > Math.abs(y)) {
                 if (x < -6) {
-                    String message = "AD 0,1,10;";
-                    mBluetoothConnectionService.write(message.getBytes()); //rr
+                    String message = "AD 0,1,0;";
+                    mBluetoothConnectionService.send(message); //rr
                 }
                 if (x > 6) {
-                    String message = "AD 0,3,10;";
-                    mBluetoothConnectionService.write(message.getBytes()); //rl
+                    String message = "AD 0,3,0;";
+                    mBluetoothConnectionService.send(message); //rl
                 }
             } else {
                 if (y < -5) {
                     String message = "AD 0,0,10;";
-                    mBluetoothConnectionService.write(message.getBytes()); //mf
+                    mBluetoothConnectionService.send(message); //mf
                 }
                 if (y > 5) {
                     String message = "AD 0,2,10;";
-                    mBluetoothConnectionService.write(message.getBytes()); //mb
+                    mBluetoothConnectionService.send(message); //mb
                 }
             }
             if (x > (-2) && x < (2) && y > (-2) && y < (2)) {

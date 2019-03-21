@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity
             setTitle("Configure");
             fragment = new ConfigureFragment();
         } else if (id == R.id.nav_mdf) {
-            setTitle("MDF");
+            setTitle("MDP AY1819S2 GROUP 6");
             fragment = new MDFFragment();
         }
 

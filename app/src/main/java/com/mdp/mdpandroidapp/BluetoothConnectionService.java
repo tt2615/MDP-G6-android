@@ -317,7 +317,7 @@ public class BluetoothConnectionService {
             class IndicateAlive extends TimerTask {
                 public void run() {
                     Log.d(TAG,"instantiate timer task");
-                    mConnectedThread.write("RP Z".getBytes());
+                    send("RP Z");
                 }
             }
 
@@ -392,12 +392,13 @@ public class BluetoothConnectionService {
      * @param out The bytes to write
      * @see ConnectedThread#write(byte[])
      */
-    public synchronized void write(byte[] out) {
+    public synchronized void send(String out) {
         // Synchronize a copy of the ConnectedThread
         Log.d(TAG, "write: Write Called.");
         //perform the write
         if (mConnectedThread != null) {
-            mConnectedThread.write(out);
+            out += "$";
+            mConnectedThread.write(out.getBytes());
         }
         else{
             Log.d(TAG, "device not connected");

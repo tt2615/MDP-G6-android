@@ -31,105 +31,107 @@
             android:stretchMode="columnWidth"
             android:verticalSpacing="30dp"></GridLayout>
 
-        <LinearLayout
-            android:id="@+id/wpstr_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/spstr_layout"
-            android:padding="15dp">
-
-            <TextView
-                android:id="@+id/wp_is"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Waypoint is: " />
-
-            <TextView
-                android:id="@+id/wp_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/spstr_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/MDF1_layout"
-            android:padding="15dp">
-
-            <TextView
-                android:id="@+id/sp_is"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Startpoint is: " />
-
-            <TextView
-                android:id="@+id/sp_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/MDF1_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/MDF2_layout"
-            android:padding="15dp">
-
-            <TextView
-                android:id="@+id/MDF1_is"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="MDF1 is: " />
-
-            <TextView
-                android:id="@+id/MDF1_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/MDF2_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/arrowid_layout"
-            android:padding="15dp">
-
-            <TextView
-                android:id="@+id/MDF2_is"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="MDF2 is: " />
-
-            <TextView
-                android:id="@+id/MDF2_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/arrowid_layout"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:padding="15dp">
 
-            <TextView
-                android:id="@+id/image_string_is"
+            <LinearLayout
+                android:id="@+id/wpstr_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="The image string is: " />
+                android:layout_above="@id/spstr_layout">
 
-            <TextView
-                android:id="@+id/image_string_display"
+                <TextView
+                    android:id="@+id/wp_is"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Waypoint is: " />
+
+                <TextView
+                    android:id="@+id/wp_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/spstr_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_above="@id/MDF1_layout">
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/sp_is"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Startpoint is: " />
+
+                <TextView
+                    android:id="@+id/sp_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/MDF1_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/MDF2_layout">
+
+                <TextView
+                    android:id="@+id/MDF1_is"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MDF1 is: " />
+
+                <TextView
+                    android:id="@+id/MDF1_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/MDF2_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/arrowid_layout">
+
+                <TextView
+                    android:id="@+id/MDF2_is"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MDF2 is: " />
+
+                <TextView
+                    android:id="@+id/MDF2_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/arrowid_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true">
+
+                <TextView
+                    android:id="@+id/image_string_is"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/image_string_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

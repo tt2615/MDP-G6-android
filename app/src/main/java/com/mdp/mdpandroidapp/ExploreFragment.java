@@ -56,7 +56,7 @@ public class ExploreFragment extends Fragment {
     private boolean manual_display_mode = false;
     private Integer positionId;
     private Integer oldPositionId;
-    private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>(Arrays.asList(new Integer[5][]));
+    private ArrayList<Integer[]> arrowId = new ArrayList<Integer[]>();
     private String mapDescriptor1;
     private String mapDescriptor2;
     private String arrowString = "";
@@ -146,18 +146,6 @@ public class ExploreFragment extends Fragment {
                                         updateArena();
                                         updatePosition();
                                         break;
-                                    case "ar":
-                                        int ar_x = Integer.parseInt(arduinoPosition[1]);
-                                        int ar_y = Integer.parseInt(arduinoPosition[2]);
-                                        int ar_id = Integer.parseInt(arduinoPosition[3]);
-                                        char arrowDir = msgList[1].charAt(0);
-                                        Log.d(TAG, "discovered arrow: " + ar_x + "," + ar_y +
-                                                "\ndirection: " + arrowDir);
-                                        discoverArrow(ar_x,ar_y,arrowDir,ar_id);
-                                        updateArena();
-                                        updatePosition();
-                                        mDeviceMessagesListAdapter.add("discovered arrow: " + ar_x + "," + ar_y + "," + arrowDir);
-                                        break;
                                     case "ExpEnd":
                                         Toast toast = Toast.makeText(getContext(),
                                                 "Exploration finished!",
@@ -165,6 +153,8 @@ public class ExploreFragment extends Fragment {
                                         toast.show();
                                         mDeviceMessagesListAdapter.add("Exploration finished!");
                                         deactivateButton(explore_button);
+                                        deactivateButton(auto_button);
+                                        deactivateButton(manual_button);
                                         set_parse_mode(ParsingModeCal);
                                         updateArena();
                                         updatePosition();
@@ -177,15 +167,29 @@ public class ExploreFragment extends Fragment {
                                         edit_mdf2_sp.putString("sp_mdf2", mapDescriptor2);
                                         edit_mdf2_sp.commit();
 
-                                        SharedPreferences.Editor edit_image_sp = image_sp.edit();
-                                        edit_image_sp.putString("sp_arrow", printArrows());
-                                        edit_image_sp.commit();
+
                                         break;
                                 }
                                 break;
 
                             case ParsingModeCal:
-                                switch (msgList[0]){
+                                arduinoPosition = msgList[0].split(",");
+                                switch (arduinoPosition[0]){
+                                    case "ar":
+                                        int ar_x = Integer.parseInt(arduinoPosition[1]);
+                                        int ar_y = Integer.parseInt(arduinoPosition[2]);
+                                        char arrowDir = msgList[1].charAt(0);
+                                        Log.d(TAG, "discovered arrow: " + ar_x + "," + ar_y +
+                                                "\ndirection: " + arrowDir);
+                                        discoverArrow(ar_x,ar_y,arrowDir);
+                                        updateArena();
+                                        updatePosition();
+                                        mDeviceMessagesListAdapter.add("discovered arrow: " + ar_x + "," + ar_y + "," + arrowDir);
+
+                                        SharedPreferences.Editor edit_image_sp = image_sp.edit();
+                                        edit_image_sp.putString("sp_arrow", printArrows());
+                                        edit_image_sp.commit();
+                                        break;
                                     case "CalEnd":
                                         Toast toast = Toast.makeText(getContext(),
                                                 "Calibration finished!",
@@ -239,7 +243,7 @@ public class ExploreFragment extends Fragment {
             if(i!=null) {
                 arrowString += "[" + getCol(i[0]) + "," + getRow(i[0]) + "," + Character.forDigit(i[1], 36) + "] ";
                 Log.d(TAG, "arrow dir: " + i[1]);
-            }
+            } // "Arrows found: [x,y,d] "
         }
         return arrowString;
     }
@@ -350,10 +354,10 @@ public class ExploreFragment extends Fragment {
         return (19-i/15)*16+(i%15)+1;
     }
 
-    private void discoverArrow(int ar_x, int ar_y, char ar_dir, int ar_id) {
+    private void discoverArrow(int ar_x, int ar_y, char ar_dir) {
         Integer[] tmp = {corToId(ar_x,ar_y), Character.getNumericValue(ar_dir)};
-        Log.d(TAG, "discover arrow: " + tmp[0] +" " + tmp[1]);
-        arrowId.set(ar_id, tmp);
+        Log.d(TAG, "discover arrow: " + tmp[0]);
+        arrowId.add(tmp);
     }
 
     private Integer corToId(int po_x, int po_y) {
@@ -412,7 +416,7 @@ public class ExploreFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 String start_message = "AL fp_start";
-                mBluetoothConnectionService.write(start_message.getBytes());
+                mBluetoothConnectionService.send(start_message);
                 set_parse_mode(ParsingModeFPath);
                 activateButton(fastpath_button);
             }
@@ -423,10 +427,10 @@ public class ExploreFragment extends Fragment {
             public void onClick(View view) {
                 set_parse_mode(ParsingModeExplore);
 
-                sleep(2000);
+//                sleep(2000);
 
                 String start_message = "AL exp_start";
-                mBluetoothConnectionService.write(start_message.getBytes());
+                mBluetoothConnectionService.send(start_message);
 
                 activateButton(explore_button);
             }
@@ -510,7 +514,7 @@ public class ExploreFragment extends Fragment {
                 }
                 else {
                     String start_point_message = "AL sp[" + getCol(startPointId).toString() + "," +  getRow(startPointId).toString() + "," + start_direction + "]";
-                    mBluetoothConnectionService.write(start_point_message.getBytes());
+                    mBluetoothConnectionService.send(start_point_message);
                 }
             }
         });
@@ -544,7 +548,7 @@ public class ExploreFragment extends Fragment {
                 }
                 else {
                     String send_wp_message = "AL wp[" + getCol(wayPointId).toString() + "," +  getRow(wayPointId).toString() + "]";
-                    mBluetoothConnectionService.write(send_wp_message.getBytes());
+                    mBluetoothConnectionService.send(send_wp_message);
                 }
             }
         });
@@ -573,7 +577,7 @@ public class ExploreFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 String calibrate_message = "AD 1,0,0";
-                mBluetoothConnectionService.write(calibrate_message.getBytes());
+                mBluetoothConnectionService.send(calibrate_message);
             }
         });
 
@@ -614,16 +618,16 @@ public class ExploreFragment extends Fragment {
         }
     }
 
-    public void sleep (int millisecond){
-        try
-        {
-            Thread.sleep(millisecond);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
-    }
+//    public void sleep (int millisecond){
+//        try
+//        {
+//            Thread.sleep(millisecond);
+//        }
+//        catch(InterruptedException ex)
+//        {
+//            Thread.currentThread().interrupt();
+//        }
+//    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
